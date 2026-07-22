@@ -1,21 +1,20 @@
-# vibe-app — URL Health Board
+# vibe-app — 🦙 Alpaca Meadow
 
-Reference vibe-coded app for the GTM hands-on enablement exercise (issue #284).
+A peaceful idle game for the GTM hands-on enablement exercise (issue #284):
+an alpaca ambles across a meadow — press **Space** or **click** to graze, and
+every few tufts of grass a new plant sprouts into your collection.
+
 Matches the #284 reference stack exactly: **cloudflared · web · workers · PostgreSQL · Redis**.
 
-**What it does:** submit a URL on the web page → the request is queued to Redis →
-a background worker fetches the URL and records its HTTP status + latency in
-PostgreSQL → the web page lists the results.
+## How the stack does real work
 
-## Layer → service map
-
-| #284 layer      | Compose service | Image / build            |
-|-----------------|-----------------|--------------------------|
-| application     | `web`           | FastAPI + uvicorn        |
-| workers         | `worker`        | RQ worker                |
-| PostgreSQL      | `db`            | postgres:16-alpine       |
-| Redis           | `redis`         | redis:7-alpine           |
-| cloudflared     | `cloudflared`   | cloudflare/cloudflared   |
+| #284 layer  | Compose service | Role in the game                                     |
+|-------------|-----------------|------------------------------------------------------|
+| application | `web`           | FastAPI — serves the game, `/eat`, `/walk`, `/state` |
+| workers     | `worker`        | RQ — sprouts a new plant every 8 grass eaten         |
+| PostgreSQL  | `db`            | persists grass eaten, distance walked, collected plants |
+| Redis       | `redis`         | fast live grass counter + the job queue              |
+| cloudflared | `cloudflared`   | public quick-tunnel URL                              |
 
 ## Run (inside the Ubuntu VM)
 
@@ -24,27 +23,16 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-Wait ~30s for images to build, then:
-
 ```bash
-# local check (from the VM or host, via the VM IP)
-curl -s localhost:8000/healthz        # -> {"ok":true}
-
-# get the public URL (quick tunnel, no Cloudflare account needed)
+curl -s localhost:8000/healthz     # -> {"ok":true}
 docker compose logs cloudflared | grep -Eo 'https://[a-z0-9-]+\.trycloudflare\.com'
 ```
 
-Open that `*.trycloudflare.com` URL in a browser — that satisfies completion bar #1
-(app reachable through a cloudflared URL).
+Open that `*.trycloudflare.com` URL and graze. 🌿
 
-## Useful commands
+## Deploy
 
-```bash
-docker compose ps                 # service status
-docker compose logs -f worker     # watch jobs run
-docker compose down               # stop (keeps data volume)
-docker compose down -v            # stop + wipe Postgres data
-```
+Push to `master` → GitHub Actions runs `deploy.sh` on the VM through Alpacon
+(`git pull` + `docker compose up -d --build`), no SSH. See `.github/workflows/deploy.yml`.
 
-The quick-tunnel hostname changes every restart. For a stable hostname you'd use a
-named Cloudflare tunnel with a token — out of scope for this exercise.
+The quick-tunnel hostname changes on every restart (ephemeral demo link).

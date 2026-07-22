@@ -11,18 +11,26 @@ def get_conn():
 
 
 def init_db():
-    """Create the checks table if it does not exist. Safe to call repeatedly."""
+    """Create the game tables if missing, and ensure a single game row. Idempotent."""
     with get_conn() as conn:
         conn.execute(
             """
-            CREATE TABLE IF NOT EXISTS checks (
-                id          SERIAL PRIMARY KEY,
-                url         TEXT NOT NULL,
-                status      TEXT NOT NULL DEFAULT 'queued',
-                http_status INTEGER,
-                latency_ms  INTEGER,
-                checked_at  TIMESTAMPTZ,
-                created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+            CREATE TABLE IF NOT EXISTS game (
+                id          INTEGER PRIMARY KEY DEFAULT 1,
+                grass_eaten BIGINT NOT NULL DEFAULT 0,
+                distance_m  BIGINT NOT NULL DEFAULT 0,
+                CONSTRAINT game_singleton CHECK (id = 1)
+            )
+            """
+        )
+        conn.execute("INSERT INTO game (id) VALUES (1) ON CONFLICT (id) DO NOTHING")
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS plants (
+                id           SERIAL PRIMARY KEY,
+                species      TEXT NOT NULL,
+                emoji        TEXT NOT NULL,
+                collected_at TIMESTAMPTZ NOT NULL DEFAULT now()
             )
             """
         )

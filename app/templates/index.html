@@ -3,60 +3,196 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>URL Health Board · Alpacon Exercise</title>
+  <title>🦙 Alpaca Meadow</title>
   <style>
-    :root { --bg:#0f1720; --card:#17212b; --line:#243240; --fg:#e6edf3; --mut:#8b98a5; --brand:#27AAE1; }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: -apple-system, Inter, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--fg); }
-    .wrap { max-width: 820px; margin: 0 auto; padding: 40px 20px; }
-    h1 { font-size: 22px; margin: 0 0 4px; }
-    p.sub { color: var(--mut); margin: 0 0 24px; font-size: 14px; }
-    form { display:flex; gap:8px; margin-bottom: 24px; }
-    input[type=url] { flex:1; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--fg); font-size:14px; }
-    button { padding:10px 16px; border-radius:8px; border:0; background:var(--brand); color:#fff; font-weight:600; cursor:pointer; }
-    table { width:100%; border-collapse: collapse; font-size: 14px; }
-    th, td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--line); }
-    th { color:var(--mut); font-weight:500; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
-    td.url { max-width: 320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .pill { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:600; }
-    .pill.ok { background:#12351f; color:#5fd08a; }
-    .pill.down { background:#3a2417; color:#f0a35e; }
-    .pill.error { background:#3a1720; color:#f06e7e; }
-    .pill.queued { background:#1d2b3a; color:#7fb8e6; }
-    .empty { color:var(--mut); padding: 24px 0; }
+    :root{
+      --sky-top:#bfe3ff; --sky-bot:#e9f7e0; --hill-far:#a7d8a0; --hill-near:#7cc47a;
+      --grass:#5bb45a; --grass-dark:#49a049; --ink:#31513a; --card:rgba(255,255,255,.72);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;overflow:hidden;font-family:-apple-system,Inter,"Segoe UI",Roboto,sans-serif;color:var(--ink)}
+    body{background:linear-gradient(#bfe3ff 0%,#d9f0ff 45%,#eafbe6 72%,#eafbe6 100%);cursor:pointer;user-select:none}
+    #scene{position:fixed;inset:0}
+
+    /* sun */
+    .sun{position:absolute;top:7%;right:12%;width:84px;height:84px;border-radius:50%;
+      background:radial-gradient(circle at 50% 50%,#fff7c9,#ffe27a);box-shadow:0 0 60px 18px rgba(255,226,122,.55)}
+
+    /* clouds */
+    .cloud{position:absolute;background:#fff;border-radius:50px;opacity:.9;filter:blur(.3px)}
+    .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+    .c1{top:14%;width:120px;height:34px;animation:drift 46s linear infinite}
+    .c2{top:26%;width:80px;height:24px;animation:drift 63s linear infinite;animation-delay:-20s;opacity:.8}
+    .c3{top:9%;width:150px;height:40px;animation:drift 80s linear infinite;animation-delay:-40s;opacity:.75}
+    .cloud::before{width:55%;height:180%;top:-55%;left:12%}
+    .cloud::after{width:45%;height:150%;top:-40%;right:14%}
+    @keyframes drift{from{left:-20%}to{left:120%}}
+
+    /* rolling hills */
+    .hill{position:absolute;left:-5%;width:110%;border-radius:50% 50% 0 0}
+    .hill.far{bottom:26%;height:26%;background:var(--hill-far)}
+    .hill.near{bottom:20%;height:22%;background:var(--hill-near)}
+
+    /* ground */
+    .ground{position:absolute;left:0;right:0;bottom:0;height:26%;background:linear-gradient(var(--grass),var(--grass-dark))}
+    .ground .blades{position:absolute;inset:0;
+      background-image:repeating-linear-gradient(90deg,transparent 0 26px,rgba(255,255,255,.10) 26px 28px);
+      animation:scroll 2.2s linear infinite}
+    @keyframes scroll{from{background-position:0 0}to{background-position:-56px 0}}
+
+    /* floating pollen */
+    .pollen{position:absolute;width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.8);
+      bottom:24%;animation:float 9s ease-in-out infinite}
+
+    /* alpaca */
+    #alpaca{position:absolute;left:16%;bottom:22%;width:190px;transform-origin:bottom center;animation:bob 3.4s ease-in-out infinite}
+    @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    #headgroup{transform-origin:74px 96px;transition:transform .28s cubic-bezier(.34,1.4,.5,1)}
+    #alpaca.eat #headgroup{transform:rotate(46deg)}
+
+    /* grass tufts the alpaca grazes on */
+    .tuft{position:absolute;bottom:21%;font-size:26px;transition:transform .2s,opacity .2s;filter:saturate(1.1)}
+    .tuft.eaten{transform:translateY(6px) scale(.2);opacity:0}
+
+    /* HUD */
+    #hud{position:absolute;top:16px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:5}
+    #hud .stat{background:var(--card);backdrop-filter:blur(6px);border-radius:999px;padding:8px 16px;
+      font-weight:700;font-size:15px;box-shadow:0 4px 14px rgba(49,81,58,.14);white-space:nowrap}
+    #hud .stat small{font-weight:600;opacity:.6}
+
+    /* collected plants shelf */
+    #shelf{position:absolute;left:16px;right:16px;bottom:14px;z-index:5;background:var(--card);backdrop-filter:blur(6px);
+      border-radius:16px;padding:10px 12px;box-shadow:0 6px 20px rgba(49,81,58,.16)}
+    #shelf .title{font-size:12px;font-weight:700;opacity:.65;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+    #plants{display:flex;flex-wrap:wrap;gap:6px;max-height:74px;overflow:auto}
+    #plants span{font-size:22px;line-height:1.1;animation:pop .4s ease}
+    #plants .empty{font-size:13px;font-weight:600;opacity:.5}
+    @keyframes pop{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:scale(1);opacity:1}}
+
+    #hint{position:absolute;bottom:96px;left:50%;transform:translateX(-50%);z-index:5;font-size:13px;font-weight:600;
+      color:#2c4a35;opacity:.7;background:rgba(255,255,255,.55);padding:6px 12px;border-radius:999px}
+    .nom{position:absolute;font-size:18px;font-weight:800;color:#3a7a45;pointer-events:none;z-index:6;animation:nom .7s ease forwards}
+    @keyframes nom{0%{opacity:0;transform:translateY(0) scale(.8)}30%{opacity:1}100%{opacity:0;transform:translateY(-34px) scale(1.1)}}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>URL Health Board</h1>
-    <p class="sub">Submit a URL → it's queued to Redis → a worker checks it → result lands in Postgres. Refresh to see updates.</p>
+  <div id="scene">
+    <div class="sun"></div>
+    <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+    <div class="hill far"></div><div class="hill near"></div>
+    <div class="ground"><div class="blades"></div></div>
 
-    <form action="/check" method="post">
-      <input type="url" name="url" placeholder="https://alpacax.com" required>
-      <button type="submit">Check</button>
-    </form>
+    <!-- grazing tufts -->
+    <div class="tuft" style="left:27%">🌿</div>
+    <div class="tuft" style="left:31%;font-size:22px">🌱</div>
+    <div class="tuft" style="left:24%;font-size:20px">🍀</div>
 
-    {% if checks %}
-    <table>
-      <thead>
-        <tr><th>#</th><th>URL</th><th>Status</th><th>HTTP</th><th>Latency</th><th>Checked</th></tr>
-      </thead>
-      <tbody>
-        {% for c in checks %}
-        <tr>
-          <td>{{ c.id }}</td>
-          <td class="url" title="{{ c.url }}">{{ c.url }}</td>
-          <td><span class="pill {{ c.status }}">{{ c.status }}</span></td>
-          <td>{{ c.http_status if c.http_status is not none else "—" }}</td>
-          <td>{{ (c.latency_ms ~ " ms") if c.latency_ms is not none else "—" }}</td>
-          <td>{{ c.checked_at.strftime("%H:%M:%S") if c.checked_at else "pending" }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <p class="empty">No checks yet — submit a URL above.</p>
-    {% endif %}
+    <!-- the alpaca -->
+    <svg id="alpaca" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <!-- legs -->
+      <rect x="70" y="150" width="12" height="40" rx="6" fill="#efe6d6"/>
+      <rect x="92" y="150" width="12" height="40" rx="6" fill="#e7dcc9"/>
+      <rect x="118" y="150" width="12" height="40" rx="6" fill="#efe6d6"/>
+      <rect x="138" y="150" width="12" height="40" rx="6" fill="#e7dcc9"/>
+      <!-- body -->
+      <ellipse cx="108" cy="132" rx="60" ry="40" fill="#f6efe0"/>
+      <ellipse cx="108" cy="120" rx="58" ry="30" fill="#fffaf0"/>
+      <!-- tail -->
+      <circle cx="164" cy="126" r="14" fill="#f6efe0"/>
+      <!-- head + neck group (dips when eating) -->
+      <g id="headgroup">
+        <rect x="64" y="70" width="26" height="66" rx="13" fill="#f6efe0"/>
+        <ellipse cx="74" cy="66" rx="24" ry="22" fill="#fffaf0"/>
+        <!-- ears -->
+        <path d="M60 52 L56 30 L72 46 Z" fill="#f6efe0"/>
+        <path d="M88 52 L94 30 L76 46 Z" fill="#f6efe0"/>
+        <!-- face -->
+        <circle cx="66" cy="64" r="3.4" fill="#4a3d33"/>
+        <ellipse cx="80" cy="74" rx="12" ry="9" fill="#efe0cc"/>
+        <circle cx="82" cy="72" r="1.8" fill="#8a7a68"/>
+        <circle cx="86" cy="76" r="1.8" fill="#8a7a68"/>
+      </g>
+    </svg>
+
+    <!-- UI -->
+    <div id="hud">
+      <div class="stat">🌾 <span id="grass">0</span> <small>grass</small></div>
+      <div class="stat">📏 <span id="dist">0</span> <small>m</small></div>
+      <div class="stat">🪴 <span id="pcount">0</span> <small>plants</small></div>
+    </div>
+
+    <div id="hint">Space / Click to graze 🌿</div>
+
+    <div id="shelf">
+      <div class="title">🌸 collected plants</div>
+      <div id="plants"><span class="empty">graze to grow your garden…</span></div>
+    </div>
   </div>
+
+  <script>
+    const $ = s => document.querySelector(s);
+    const alpaca = $('#alpaca'), tufts = [...document.querySelectorAll('.tuft')];
+    let busy = false;
+
+    // sprinkle drifting pollen
+    for (let i=0;i<9;i++){
+      const p=document.createElement('div'); p.className='pollen';
+      p.style.left=(10+Math.random()*80)+'%';
+      p.style.animationDelay=(-Math.random()*9)+'s';
+      p.style.opacity=0.4+Math.random()*0.5;
+      document.getElementById('scene').appendChild(p);
+    }
+
+    function render(s){
+      $('#grass').textContent = s.grass_eaten;
+      $('#dist').textContent = s.distance_m;
+      $('#pcount').textContent = s.plants.length;
+      const box = $('#plants');
+      const have = box.querySelectorAll('span:not(.empty)').length;
+      if (s.plants.length === 0){ return; }
+      if (have !== s.plants.length){
+        box.innerHTML = '';
+        // oldest first so newest pops on the end
+        [...s.plants].reverse().forEach(pl=>{
+          const el=document.createElement('span'); el.textContent=pl.emoji; el.title=pl.species; box.appendChild(el);
+        });
+        box.scrollTop = box.scrollHeight;
+      }
+    }
+
+    async function refresh(){
+      try{ const r=await fetch('/state'); render(await r.json()); }catch(e){}
+    }
+
+    function nom(){
+      const n=document.createElement('div'); n.className='nom'; n.textContent='nom';
+      n.style.left='20%'; n.style.bottom='40%';
+      document.getElementById('scene').appendChild(n);
+      setTimeout(()=>n.remove(),700);
+    }
+
+    async function graze(){
+      if(busy) return; busy=true;
+      alpaca.classList.add('eat');
+      const t = tufts[Math.floor(Math.random()*tufts.length)];
+      t.classList.add('eaten');
+      nom();
+      setTimeout(()=>{ alpaca.classList.remove('eat'); t.classList.remove('eaten'); busy=false; }, 300);
+      try{
+        const r = await fetch('/eat',{method:'POST'});
+        const d = await r.json();
+        $('#grass').textContent = d.grass_eaten;
+        if (d.sprouting) setTimeout(refresh, 700); // worker sprouts a plant
+      }catch(e){ busy=false; }
+    }
+
+    document.addEventListener('keydown', e=>{ if(e.code==='Space'){ e.preventDefault(); graze(); } });
+    document.addEventListener('click', graze);
+
+    // idle ambling — the alpaca keeps walking on its own
+    setInterval(async()=>{ try{ const r=await fetch('/walk',{method:'POST'}); const d=await r.json(); $('#dist').textContent=d.distance_m; }catch(e){} }, 3000);
+    setInterval(refresh, 2500);
+    refresh();
+  </script>
 </body>
 </html>

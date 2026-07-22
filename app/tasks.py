@@ -1,25 +1,27 @@
-import time
-
-import httpx
+import random
 
 from db import get_conn
 
+# Peaceful little meadow flora the alpaca discovers while grazing.
+SPECIES = [
+    ("Daisy", "🌼"),
+    ("Tulip", "🌷"),
+    ("Sunflower", "🌻"),
+    ("Clover", "🍀"),
+    ("Blossom", "🌸"),
+    ("Fern", "🌿"),
+    ("Lotus", "🪷"),
+    ("Wheat", "🌾"),
+    ("Sprout", "🌱"),
+    ("Hibiscus", "🌺"),
+]
 
-def check_url(check_id: int, url: str):
-    """Background job: fetch the URL, record status + latency in Postgres."""
-    start = time.monotonic()
-    http_status = None
-    status = "error"
-    try:
-        resp = httpx.get(url, follow_redirects=True, timeout=10.0)
-        http_status = resp.status_code
-        status = "ok" if resp.status_code < 400 else "down"
-    except Exception:
-        status = "error"
-    latency_ms = int((time.monotonic() - start) * 1000)
 
+def sprout_plant():
+    """Background job: a new plant sprouts and joins the collection."""
+    species, emoji = random.choice(SPECIES)
     with get_conn() as conn:
         conn.execute(
-            "UPDATE checks SET status=%s, http_status=%s, latency_ms=%s, checked_at=now() WHERE id=%s",
-            (status, http_status, latency_ms, check_id),
+            "INSERT INTO plants (species, emoji) VALUES (%s, %s)",
+            (species, emoji),
         )
