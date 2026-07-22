@@ -10,7 +10,7 @@
     body{background:linear-gradient(#bfe3ff 0%,#d9f0ff 40%,#eafbe6 70%,#eafbe6 100%);cursor:pointer}
     #scene{position:fixed;inset:0}
 
-    .sun{position:absolute;top:7%;right:12%;width:82px;height:82px;border-radius:50%;
+    .sun{position:absolute;top:7%;left:12%;width:82px;height:82px;border-radius:50%;
       background:radial-gradient(circle,#fff7c9,#ffe27a);box-shadow:0 0 60px 18px rgba(255,226,122,.5)}
     .cloud{position:absolute;background:#fff;border-radius:50px;opacity:.9}
     .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
@@ -20,14 +20,15 @@
     .c3{top:8%;width:150px;height:40px;animation:drift 84s linear infinite;animation-delay:-40s;opacity:.75}
     @keyframes drift{from{left:-20%}to{left:120%}}
 
-    /* parallax layers */
+    /* parallax strips — duplicated content + translateX(-50%) = seamless loop */
     .layer{position:absolute;left:0;white-space:nowrap;will-change:transform}
-    .treeline{font-size:0}
-    .treeline span{display:inline-block}
-    .far-trees{bottom:34%;animation:slide 34s linear infinite;filter:hue-rotate(-8deg) brightness(.92) saturate(.8);opacity:.85}
+    .layer span{display:inline-block}
+    .far-trees{bottom:34%;animation:slide 40s linear infinite;filter:brightness(.92) saturate(.8);opacity:.85}
     .far-trees span{font-size:44px;margin-right:26px}
-    .near-trees{bottom:20%;animation:slide 15s linear infinite}
+    .near-trees{bottom:20%;animation:slide 17s linear infinite}
     .near-trees span{font-size:76px;margin-right:34px;filter:drop-shadow(0 6px 4px rgba(0,60,20,.12))}
+    .flowers{bottom:14%;animation:slide 11s linear infinite}
+    .flowers span{font-size:24px;margin-right:50px}
     @keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
     .hill{position:absolute;left:-5%;width:110%;border-radius:50% 50% 0 0}
@@ -43,20 +44,23 @@
       animation:flow 6s linear infinite;opacity:.5}
     @keyframes flow{from{background-position:0 0}to{background-position:120px 0}}
 
-    /* ground */
-    .ground{position:absolute;left:0;right:0;bottom:0;height:24%;background:linear-gradient(#5bb45a,#3f9a42)}
-    .ground .blades{position:absolute;inset:0;
-      background-image:repeating-linear-gradient(90deg,transparent 0 24px,rgba(255,255,255,.10) 24px 26px);
-      animation:scroll 1.1s linear infinite}
-    @keyframes scroll{from{background-position:0 0}to{background-position:-52px 0}}
-    .flowers{bottom:15%;animation:slide 9s linear infinite}
-    .flowers span{font-size:24px;margin-right:52px}
+    /* ground — brown gravel so the green grazing tufts stand out */
+    .ground{position:absolute;left:0;right:0;bottom:0;height:24%;background:linear-gradient(#b89a6f,#8a6d47)}
+    .ground .gravel{position:absolute;inset:0;
+      background-image:
+        radial-gradient(circle at 12px 9px,rgba(255,255,255,.16) 2px,transparent 3px),
+        radial-gradient(circle at 34px 22px,rgba(0,0,0,.14) 2.4px,transparent 3px),
+        radial-gradient(circle at 56px 12px,rgba(255,255,255,.12) 1.6px,transparent 3px),
+        radial-gradient(circle at 74px 27px,rgba(0,0,0,.12) 2px,transparent 3px);
+      background-size:88px 36px;animation:scroll 1.1s linear infinite}
+    @keyframes scroll{from{background-position:0 0}to{background-position:-88px 0}}
 
     .pollen{position:absolute;width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.85);bottom:22%;animation:float 9s ease-in-out infinite}
     @keyframes float{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-40px);opacity:.95}}
 
-    /* alpaca — now walking */
-    #alpaca{position:absolute;left:15%;bottom:21%;width:196px;animation:trot .82s ease-in-out infinite}
+    /* alpaca — wrapper flips it to face right; svg does the trot bob */
+    #alpacaWrap{position:absolute;left:58%;bottom:21%;width:196px;transform:scaleX(-1)}
+    #alpaca{width:100%;animation:trot .82s ease-in-out infinite}
     @keyframes trot{0%,100%{transform:translateY(0)}25%{transform:translateY(-5px)}50%{transform:translateY(0)}75%{transform:translateY(-5px)}}
     #alpaca .leg{transform-box:fill-box;transform-origin:50% 0}
     #legFL,#legBR{animation:swingA .82s ease-in-out infinite}
@@ -64,15 +68,21 @@
     @keyframes swingA{0%,100%{transform:rotate(17deg)}50%{transform:rotate(-17deg)}}
     @keyframes swingB{0%,100%{transform:rotate(-17deg)}50%{transform:rotate(17deg)}}
     #headgroup{transform-origin:74px 96px;transition:transform .28s cubic-bezier(.34,1.4,.5,1)}
-    #alpaca.eat #headgroup{transform:rotate(46deg)}
+    #alpacaWrap.eat #headgroup{transform:translateY(12px) rotate(40deg)}
 
-    .tuft{position:absolute;bottom:20%;font-size:26px;transition:transform .2s,opacity .2s}
-    .tuft.eaten{transform:translateY(6px) scale(.2);opacity:0}
+    /* green grazing tufts (distinct from the brown ground) */
+    .tuft{position:absolute;bottom:19%;font-size:30px;transition:transform .2s,opacity .2s;filter:drop-shadow(0 2px 1px rgba(0,60,20,.25))}
+    .tuft.eaten{transform:translateY(8px) scale(.2);opacity:0}
     .nom{position:absolute;font-size:18px;font-weight:800;color:#3a7a45;pointer-events:none;z-index:6;animation:nom .7s ease forwards}
     @keyframes nom{0%{opacity:0;transform:translateY(0)}30%{opacity:1}100%{opacity:0;transform:translateY(-34px) scale(1.1)}}
 
+    /* tagline */
+    #tagline{position:absolute;top:16px;left:16px;z-index:5;pointer-events:none;line-height:1.2}
+    #tagline b{display:block;font-size:18px;color:#2c4a35;text-shadow:0 1px 2px rgba(255,255,255,.6)}
+    #tagline small{font-size:12px;font-weight:600;opacity:.62}
+
     /* HUD + shelf */
-    #hud{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:9px;z-index:5;flex-wrap:wrap;justify-content:center;max-width:96%}
+    #hud{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:9px;z-index:5;flex-wrap:wrap;justify-content:center;max-width:70%}
     .stat{background:rgba(255,255,255,.74);backdrop-filter:blur(6px);border-radius:999px;padding:7px 15px;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(49,81,58,.14);white-space:nowrap}
     .stat small{font-weight:600;opacity:.6}
     #who{position:absolute;top:14px;right:14px;z-index:5;background:rgba(255,255,255,.74);backdrop-filter:blur(6px);border:0;border-radius:999px;padding:7px 13px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(49,81,58,.14)}
@@ -84,17 +94,12 @@
     @keyframes pop{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:scale(1);opacity:1}}
     #hint{position:absolute;bottom:92px;left:50%;transform:translateX(-50%);z-index:5;font-size:13px;font-weight:600;color:#2c4a35;opacity:.75;background:rgba(255,255,255,.55);padding:6px 12px;border-radius:999px}
 
-    /* login overlay */
-    #login{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
-      background:linear-gradient(rgba(191,227,255,.55),rgba(234,251,230,.55));backdrop-filter:blur(4px)}
-    #login .card{background:rgba(255,255,255,.92);border-radius:22px;padding:26px 24px;width:min(340px,90vw);
-      box-shadow:0 18px 50px rgba(49,81,58,.28);text-align:center}
-    #login h1{margin:0 0 2px;font-size:24px}
-    #login p{margin:0 0 16px;font-size:13px;opacity:.65}
+    #login{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:linear-gradient(rgba(191,227,255,.55),rgba(234,251,230,.55));backdrop-filter:blur(4px)}
+    #login .card{background:rgba(255,255,255,.92);border-radius:22px;padding:26px 24px;width:min(340px,90vw);box-shadow:0 18px 50px rgba(49,81,58,.28);text-align:center}
+    #login h1{margin:0 0 2px;font-size:24px}#login p{margin:0 0 16px;font-size:13px;opacity:.65}
     #login input{width:100%;padding:12px 14px;margin:6px 0;border:1.5px solid #cfe3d2;border-radius:12px;font-size:16px;text-align:center}
     #login input:focus{outline:none;border-color:#5bb45a}
     #login button{width:100%;margin-top:10px;padding:12px;border:0;border-radius:12px;background:#5bb45a;color:#fff;font-weight:800;font-size:16px;cursor:pointer}
-    #login button:active{transform:translateY(1px)}
     #loginerr{color:#d9534f;font-size:13px;font-weight:600;min-height:18px;margin-top:8px}
     .hidden{display:none!important}
   </style>
@@ -103,37 +108,40 @@
   <div id="scene">
     <div class="sun"></div>
     <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
-    <div class="layer treeline far-trees" id="farTrees"></div>
+    <div class="layer far-trees" id="farTrees"></div>
     <div class="hill far"></div>
     <div class="river"></div>
     <div class="hill near"></div>
-    <div class="layer treeline near-trees" id="nearTrees"></div>
-    <div class="ground"><div class="blades"></div></div>
+    <div class="layer near-trees" id="nearTrees"></div>
+    <div class="ground"><div class="gravel"></div></div>
     <div class="layer flowers" id="flowers"></div>
 
-    <div class="tuft" style="left:26%">🌿</div>
-    <div class="tuft" style="left:30%;font-size:22px">🌱</div>
-    <div class="tuft" style="left:23%;font-size:20px">🍀</div>
+    <div class="tuft" style="left:46%">🌿</div>
+    <div class="tuft" style="left:50%;font-size:26px">🌱</div>
+    <div class="tuft" style="left:54%;font-size:24px">🍀</div>
 
-    <svg id="alpaca" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <rect id="legBL" class="leg" x="118" y="150" width="12" height="40" rx="6" fill="#e7dcc9"/>
-      <rect id="legFL" class="leg" x="70" y="150" width="12" height="40" rx="6" fill="#e7dcc9"/>
-      <rect id="legBR" class="leg" x="138" y="150" width="12" height="40" rx="6" fill="#efe6d6"/>
-      <rect id="legFR" class="leg" x="92" y="150" width="12" height="40" rx="6" fill="#efe6d6"/>
-      <ellipse cx="108" cy="132" rx="60" ry="40" fill="#f6efe0"/>
-      <ellipse cx="108" cy="120" rx="58" ry="30" fill="#fffaf0"/>
-      <circle cx="164" cy="126" r="14" fill="#f6efe0"/>
-      <g id="headgroup">
-        <rect x="64" y="70" width="26" height="66" rx="13" fill="#f6efe0"/>
-        <ellipse cx="74" cy="66" rx="24" ry="22" fill="#fffaf0"/>
-        <path d="M60 52 L56 30 L72 46 Z" fill="#f6efe0"/>
-        <path d="M88 52 L94 30 L76 46 Z" fill="#f6efe0"/>
-        <circle cx="66" cy="64" r="3.4" fill="#4a3d33"/>
-        <ellipse cx="80" cy="74" rx="12" ry="9" fill="#efe0cc"/>
-        <circle cx="82" cy="72" r="1.8" fill="#8a7a68"/><circle cx="86" cy="76" r="1.8" fill="#8a7a68"/>
-      </g>
-    </svg>
+    <div id="alpacaWrap">
+      <svg id="alpaca" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <rect id="legBL" class="leg" x="118" y="150" width="12" height="40" rx="6" fill="#e7dcc9"/>
+        <rect id="legFL" class="leg" x="70" y="150" width="12" height="40" rx="6" fill="#e7dcc9"/>
+        <rect id="legBR" class="leg" x="138" y="150" width="12" height="40" rx="6" fill="#efe6d6"/>
+        <rect id="legFR" class="leg" x="92" y="150" width="12" height="40" rx="6" fill="#efe6d6"/>
+        <ellipse cx="108" cy="132" rx="60" ry="40" fill="#f6efe0"/>
+        <ellipse cx="108" cy="120" rx="58" ry="30" fill="#fffaf0"/>
+        <circle cx="164" cy="126" r="14" fill="#f6efe0"/>
+        <g id="headgroup">
+          <rect x="64" y="70" width="26" height="66" rx="13" fill="#f6efe0"/>
+          <ellipse cx="74" cy="66" rx="24" ry="22" fill="#fffaf0"/>
+          <path d="M60 52 L56 30 L72 46 Z" fill="#f6efe0"/>
+          <path d="M88 52 L94 30 L76 46 Z" fill="#f6efe0"/>
+          <circle cx="66" cy="64" r="3.4" fill="#4a3d33"/>
+          <ellipse cx="80" cy="74" rx="12" ry="9" fill="#efe0cc"/>
+          <circle cx="82" cy="72" r="1.8" fill="#8a7a68"/><circle cx="86" cy="76" r="1.8" fill="#8a7a68"/>
+        </g>
+      </svg>
+    </div>
 
+    <div id="tagline"><b>enjoy the peace</b><small>no thinking required 🌿</small></div>
     <button id="who" class="hidden">🦙 <span id="pid"></span> · switch</button>
     <div id="hud" class="hidden">
       <div class="stat">🌾 <span id="grass">0</span> <small>grass</small></div>
@@ -147,7 +155,6 @@
     </div>
   </div>
 
-  <!-- login / resume -->
   <div id="login">
     <div class="card">
       <h1>🦙 Alpaca Meadow</h1>
@@ -161,68 +168,50 @@
 
   <script>
     const $=s=>document.querySelector(s);
-    const TREES=['🌲','🌳','🌴'], FLOWERS=['🌷','🌼','🌻','🌸','🪻'];
-    // build parallax strips (duplicated so the -50% loop is seamless)
-    function strip(el,set,n){let h='';for(let k=0;k<2;k++)for(let i=0;i<n;i++)h+='<span>'+set[i%set.length]+'</span>';el.innerHTML=h;el.style.width=(n*140)+'px';}
-    strip($('#farTrees'),TREES,16); strip($('#nearTrees'),['🌳','🌲'],12); strip($('#flowers'),FLOWERS,14);
+    // seamless strips: two identical halves, no explicit width (content decides it)
+    function strip(el,set,n){let h='';for(let k=0;k<2;k++)for(let i=0;i<n;i++)h+='<span>'+set[i%set.length]+'</span>';el.innerHTML=h;}
+    strip($('#farTrees'),['🌲','🌳','🌴'],18);
+    strip($('#nearTrees'),['🌳','🌲'],14);
+    strip($('#flowers'),['🌷','🌼','🌻','🌸','🪻'],16);
     for(let i=0;i<9;i++){const p=document.createElement('div');p.className='pollen';p.style.left=(10+Math.random()*80)+'%';p.style.animationDelay=(-Math.random()*9)+'s';$('#scene').appendChild(p);}
 
-    let TOKEN=localStorage.getItem('alpaca_token')||'';
-    let busy=false, loops=[];
-    const alpaca=$('#alpaca'), tufts=[...document.querySelectorAll('.tuft')];
-
+    let TOKEN=localStorage.getItem('alpaca_token')||'';let busy=false;
+    const wrap=$('#alpacaWrap'), tufts=[...document.querySelectorAll('.tuft')];
     const H=()=>TOKEN?{'X-Player-Token':TOKEN}:{};
-    async function api(path,method='GET'){return fetch(path,{method,headers:H()});}
+    const api=(p,m='GET')=>fetch(p,{method:m,headers:H()});
 
     function render(s){
-      $('#pid').textContent=s.player_id;
-      $('#grass').textContent=s.grass_eaten; $('#dist').textContent=s.distance_m; $('#pcount').textContent=s.plants.length;
-      const box=$('#plants'); const have=box.querySelectorAll('span:not(.empty)').length;
-      if(s.plants.length && have!==s.plants.length){
-        box.innerHTML=''; [...s.plants].reverse().forEach(pl=>{const el=document.createElement('span');el.textContent=pl.emoji;el.title=pl.species;box.appendChild(el);});
-        box.scrollTop=box.scrollHeight;
-      }
+      $('#pid').textContent=s.player_id;$('#grass').textContent=s.grass_eaten;$('#dist').textContent=s.distance_m;$('#pcount').textContent=s.plants.length;
+      const box=$('#plants');const have=box.querySelectorAll('span:not(.empty)').length;
+      if(s.plants.length&&have!==s.plants.length){box.innerHTML='';[...s.plants].reverse().forEach(pl=>{const el=document.createElement('span');el.textContent=pl.emoji;el.title=pl.species;box.appendChild(el);});box.scrollTop=box.scrollHeight;}
     }
     async function refresh(){const r=await api('/state');if(r.ok)render(await r.json());}
-
-    function nom(){const n=document.createElement('div');n.className='nom';n.textContent='nom';n.style.left='19%';n.style.bottom='40%';$('#scene').appendChild(n);setTimeout(()=>n.remove(),700);}
+    function nom(){const n=document.createElement('div');n.className='nom';n.textContent='nom';n.style.left='52%';n.style.bottom='40%';$('#scene').appendChild(n);setTimeout(()=>n.remove(),700);}
     async function graze(){
       if(busy||!TOKEN)return;busy=true;
-      alpaca.classList.add('eat');const t=tufts[Math.floor(Math.random()*tufts.length)];t.classList.add('eaten');nom();
-      setTimeout(()=>{alpaca.classList.remove('eat');t.classList.remove('eaten');busy=false;},300);
+      wrap.classList.add('eat');const t=tufts[Math.floor(Math.random()*tufts.length)];t.classList.add('eaten');nom();
+      setTimeout(()=>{wrap.classList.remove('eat');t.classList.remove('eaten');busy=false;},300);
       try{const r=await api('/eat','POST');const d=await r.json();$('#grass').textContent=d.grass_eaten;if(d.sprouting)setTimeout(refresh,700);}catch(e){busy=false;}
     }
-
     function startGame(){
-      ['#hud','#shelf','#hint','#who'].forEach(s=>$(s).classList.remove('hidden'));
-      $('#login').classList.add('hidden');
+      ['#hud','#shelf','#hint','#who'].forEach(s=>$(s).classList.remove('hidden'));$('#login').classList.add('hidden');
       document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();graze();}});
       document.addEventListener('click',e=>{if(!e.target.closest('#who')&&!e.target.closest('#login'))graze();});
-      loops.push(setInterval(async()=>{const r=await api('/walk','POST');if(r.ok){const d=await r.json();$('#dist').textContent=d.distance_m;}},3000));
-      loops.push(setInterval(refresh,2500));
-      refresh();
+      setInterval(async()=>{const r=await api('/walk','POST');if(r.ok){const d=await r.json();$('#dist').textContent=d.distance_m;}},3000);
+      setInterval(refresh,2500);refresh();
     }
-
     async function doLogin(){
-      const id=$('#in-id').value.trim().toLowerCase(), pin=$('#in-pin').value.trim();
-      $('#loginerr').textContent='';
+      const id=$('#in-id').value.trim().toLowerCase(),pin=$('#in-pin').value.trim();$('#loginerr').textContent='';
       try{
         const r=await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({player_id:id,pin})});
-        const d=await r.json();
-        if(!r.ok){$('#loginerr').textContent=d.detail||'try again';return;}
-        TOKEN=d.token;localStorage.setItem('alpaca_token',TOKEN);localStorage.setItem('alpaca_id',d.player_id);
-        startGame();
+        const d=await r.json();if(!r.ok){$('#loginerr').textContent=d.detail||'try again';return;}
+        TOKEN=d.token;localStorage.setItem('alpaca_token',TOKEN);localStorage.setItem('alpaca_id',d.player_id);startGame();
       }catch(e){$('#loginerr').textContent='network error';}
     }
     $('#go').addEventListener('click',doLogin);
     $('#in-pin').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
     $('#who').addEventListener('click',()=>{localStorage.removeItem('alpaca_token');location.reload();});
-
-    // resume if we already have a valid token
-    (async()=>{
-      if(TOKEN){const r=await api('/state');if(r.ok){render(await r.json());startGame();return;}localStorage.removeItem('alpaca_token');TOKEN='';}
-      $('#in-id').focus();
-    })();
+    (async()=>{if(TOKEN){const r=await api('/state');if(r.ok){render(await r.json());startGame();return;}localStorage.removeItem('alpaca_token');TOKEN='';}$('#in-id').focus();})();
   </script>
 </body>
 </html>
