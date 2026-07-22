@@ -1,0 +1,24 @@
+name: Deploy to Alpacon VM
+
+# On every push to master, deploy the latest code to the UTM VM through Alpacon
+# (no SSH, no inbound access — the command is delivered via the Alpamon agent).
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Alpacon CLI
+        uses: alpacax/alpacon-setup-action@v1
+
+      - name: Deploy latest code via Alpacon
+        uses: alpacax/alpacon-common-action@v1
+        with:
+          workspace-url: https://gudeng.ap1.alpacon.io
+          api-token: ${{ secrets.ALPACON_API_TOKEN }}
+          command: >-
+            exec -u jungyeon alpacon-vm-859643
+            "cd ~/alpacon-vibe-app && git pull && docker compose up -d --build"

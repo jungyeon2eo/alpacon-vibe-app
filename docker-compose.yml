@@ -8,6 +8,7 @@ name: vibe-app
 services:
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-app}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
@@ -22,6 +23,7 @@ services:
 
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -30,6 +32,7 @@ services:
 
   web:
     build: ./app
+    restart: unless-stopped
     command: uvicorn main:app --host 0.0.0.0 --port 8000
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@db:5432/${POSTGRES_DB:-app}
@@ -44,6 +47,7 @@ services:
 
   worker:
     build: ./app
+    restart: unless-stopped
     command: python worker.py
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@db:5432/${POSTGRES_DB:-app}
@@ -56,8 +60,10 @@ services:
 
   cloudflared:
     image: cloudflare/cloudflared:latest
+    restart: unless-stopped
     # Quick tunnel: no Cloudflare account or token needed. The public
     # https://<random>.trycloudflare.com URL is printed in this service's logs.
+    # NOTE: the URL changes on every restart (quick tunnel has no stable hostname).
     command: tunnel --no-autoupdate --url http://web:8000
     depends_on:
       - web
