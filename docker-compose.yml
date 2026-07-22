@@ -1,0 +1,66 @@
+name: vibe-app
+
+# Reference stack for the GTM hands-on enablement exercise (issue #284):
+#   cloudflared · application (web) · workers · PostgreSQL · Redis
+# The app is a small "URL Health Board": submit a URL from the web page,
+# a background worker checks it, and results are stored in Postgres.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build: ./app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@db:5432/${POSTGRES_DB:-app}
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"   # so you can also hit it locally at http://<vm-ip>:8000
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: ./app
+    command: python worker.py
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@db:5432/${POSTGRES_DB:-app}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    # Quick tunnel: no Cloudflare account or token needed. The public
+    # https://<random>.trycloudflare.com URL is printed in this service's logs.
+    command: tunnel --no-autoupdate --url http://web:8000
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
