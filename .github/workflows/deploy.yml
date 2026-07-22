@@ -19,6 +19,6 @@ jobs:
         with:
           workspace-url: https://gudeng.ap1.alpacon.io
           api-token: ${{ secrets.ALPACON_API_TOKEN }}
-          command: >-
-            exec -u jungyeon alpacon-vm-859643
-            "cd ~/alpacon-vibe-app && git pull && docker compose up -d --build"
+          # Runs a single whitelisted script (see command ACL) instead of an
+          # inline compound command — least privilege per ADR 0014.
+          command: exec -u jungyeon alpacon-vm-859643 /home/jungyeon/alpacon-vibe-app/deploy.sh
