@@ -5,194 +5,224 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>🦙 Alpaca Meadow</title>
   <style>
-    :root{
-      --sky-top:#bfe3ff; --sky-bot:#e9f7e0; --hill-far:#a7d8a0; --hill-near:#7cc47a;
-      --grass:#5bb45a; --grass-dark:#49a049; --ink:#31513a; --card:rgba(255,255,255,.72);
-    }
     *{box-sizing:border-box}
-    html,body{margin:0;height:100%;overflow:hidden;font-family:-apple-system,Inter,"Segoe UI",Roboto,sans-serif;color:var(--ink)}
-    body{background:linear-gradient(#bfe3ff 0%,#d9f0ff 45%,#eafbe6 72%,#eafbe6 100%);cursor:pointer;user-select:none}
+    html,body{margin:0;height:100%;overflow:hidden;font-family:-apple-system,Inter,"Segoe UI",Roboto,sans-serif;color:#31513a;user-select:none}
+    body{background:linear-gradient(#bfe3ff 0%,#d9f0ff 40%,#eafbe6 70%,#eafbe6 100%);cursor:pointer}
     #scene{position:fixed;inset:0}
 
-    /* sun */
-    .sun{position:absolute;top:7%;right:12%;width:84px;height:84px;border-radius:50%;
-      background:radial-gradient(circle at 50% 50%,#fff7c9,#ffe27a);box-shadow:0 0 60px 18px rgba(255,226,122,.55)}
-
-    /* clouds */
-    .cloud{position:absolute;background:#fff;border-radius:50px;opacity:.9;filter:blur(.3px)}
+    .sun{position:absolute;top:7%;right:12%;width:82px;height:82px;border-radius:50%;
+      background:radial-gradient(circle,#fff7c9,#ffe27a);box-shadow:0 0 60px 18px rgba(255,226,122,.5)}
+    .cloud{position:absolute;background:#fff;border-radius:50px;opacity:.9}
     .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
-    .c1{top:14%;width:120px;height:34px;animation:drift 46s linear infinite}
-    .c2{top:26%;width:80px;height:24px;animation:drift 63s linear infinite;animation-delay:-20s;opacity:.8}
-    .c3{top:9%;width:150px;height:40px;animation:drift 80s linear infinite;animation-delay:-40s;opacity:.75}
-    .cloud::before{width:55%;height:180%;top:-55%;left:12%}
-    .cloud::after{width:45%;height:150%;top:-40%;right:14%}
+    .cloud::before{width:55%;height:180%;top:-55%;left:12%}.cloud::after{width:45%;height:150%;top:-40%;right:14%}
+    .c1{top:13%;width:120px;height:34px;animation:drift 48s linear infinite}
+    .c2{top:24%;width:80px;height:24px;animation:drift 66s linear infinite;animation-delay:-20s;opacity:.8}
+    .c3{top:8%;width:150px;height:40px;animation:drift 84s linear infinite;animation-delay:-40s;opacity:.75}
     @keyframes drift{from{left:-20%}to{left:120%}}
 
-    /* rolling hills */
+    /* parallax layers */
+    .layer{position:absolute;left:0;white-space:nowrap;will-change:transform}
+    .treeline{font-size:0}
+    .treeline span{display:inline-block}
+    .far-trees{bottom:34%;animation:slide 34s linear infinite;filter:hue-rotate(-8deg) brightness(.92) saturate(.8);opacity:.85}
+    .far-trees span{font-size:44px;margin-right:26px}
+    .near-trees{bottom:20%;animation:slide 15s linear infinite}
+    .near-trees span{font-size:76px;margin-right:34px;filter:drop-shadow(0 6px 4px rgba(0,60,20,.12))}
+    @keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
     .hill{position:absolute;left:-5%;width:110%;border-radius:50% 50% 0 0}
-    .hill.far{bottom:26%;height:26%;background:var(--hill-far)}
-    .hill.near{bottom:20%;height:22%;background:var(--hill-near)}
+    .hill.far{bottom:30%;height:20%;background:#a7d8a0}
+    .hill.near{bottom:22%;height:18%;background:#7cc47a}
+
+    /* river */
+    .river{position:absolute;left:-2%;width:104%;bottom:30%;height:8%;
+      background:linear-gradient(#bfe9ff,#7cc7f2);border-radius:40% 40% 0 0/70%;opacity:.92;
+      box-shadow:inset 0 3px 6px rgba(255,255,255,.6)}
+    .river::after{content:"";position:absolute;inset:0;border-radius:inherit;
+      background:repeating-linear-gradient(100deg,transparent 0 40px,rgba(255,255,255,.35) 40px 46px);
+      animation:flow 6s linear infinite;opacity:.5}
+    @keyframes flow{from{background-position:0 0}to{background-position:120px 0}}
 
     /* ground */
-    .ground{position:absolute;left:0;right:0;bottom:0;height:26%;background:linear-gradient(var(--grass),var(--grass-dark))}
+    .ground{position:absolute;left:0;right:0;bottom:0;height:24%;background:linear-gradient(#5bb45a,#3f9a42)}
     .ground .blades{position:absolute;inset:0;
-      background-image:repeating-linear-gradient(90deg,transparent 0 26px,rgba(255,255,255,.10) 26px 28px);
-      animation:scroll 2.2s linear infinite}
-    @keyframes scroll{from{background-position:0 0}to{background-position:-56px 0}}
+      background-image:repeating-linear-gradient(90deg,transparent 0 24px,rgba(255,255,255,.10) 24px 26px);
+      animation:scroll 1.1s linear infinite}
+    @keyframes scroll{from{background-position:0 0}to{background-position:-52px 0}}
+    .flowers{bottom:15%;animation:slide 9s linear infinite}
+    .flowers span{font-size:24px;margin-right:52px}
 
-    /* floating pollen */
-    .pollen{position:absolute;width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.8);
-      bottom:24%;animation:float 9s ease-in-out infinite}
+    .pollen{position:absolute;width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.85);bottom:22%;animation:float 9s ease-in-out infinite}
+    @keyframes float{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-40px);opacity:.95}}
 
-    /* alpaca */
-    #alpaca{position:absolute;left:16%;bottom:22%;width:190px;transform-origin:bottom center;animation:bob 3.4s ease-in-out infinite}
-    @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    /* alpaca — now walking */
+    #alpaca{position:absolute;left:15%;bottom:21%;width:196px;animation:trot .82s ease-in-out infinite}
+    @keyframes trot{0%,100%{transform:translateY(0)}25%{transform:translateY(-5px)}50%{transform:translateY(0)}75%{transform:translateY(-5px)}}
+    #alpaca .leg{transform-box:fill-box;transform-origin:50% 0}
+    #legFL,#legBR{animation:swingA .82s ease-in-out infinite}
+    #legFR,#legBL{animation:swingB .82s ease-in-out infinite}
+    @keyframes swingA{0%,100%{transform:rotate(17deg)}50%{transform:rotate(-17deg)}}
+    @keyframes swingB{0%,100%{transform:rotate(-17deg)}50%{transform:rotate(17deg)}}
     #headgroup{transform-origin:74px 96px;transition:transform .28s cubic-bezier(.34,1.4,.5,1)}
     #alpaca.eat #headgroup{transform:rotate(46deg)}
 
-    /* grass tufts the alpaca grazes on */
-    .tuft{position:absolute;bottom:21%;font-size:26px;transition:transform .2s,opacity .2s;filter:saturate(1.1)}
+    .tuft{position:absolute;bottom:20%;font-size:26px;transition:transform .2s,opacity .2s}
     .tuft.eaten{transform:translateY(6px) scale(.2);opacity:0}
+    .nom{position:absolute;font-size:18px;font-weight:800;color:#3a7a45;pointer-events:none;z-index:6;animation:nom .7s ease forwards}
+    @keyframes nom{0%{opacity:0;transform:translateY(0)}30%{opacity:1}100%{opacity:0;transform:translateY(-34px) scale(1.1)}}
 
-    /* HUD */
-    #hud{position:absolute;top:16px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:5}
-    #hud .stat{background:var(--card);backdrop-filter:blur(6px);border-radius:999px;padding:8px 16px;
-      font-weight:700;font-size:15px;box-shadow:0 4px 14px rgba(49,81,58,.14);white-space:nowrap}
-    #hud .stat small{font-weight:600;opacity:.6}
-
-    /* collected plants shelf */
-    #shelf{position:absolute;left:16px;right:16px;bottom:14px;z-index:5;background:var(--card);backdrop-filter:blur(6px);
-      border-radius:16px;padding:10px 12px;box-shadow:0 6px 20px rgba(49,81,58,.16)}
+    /* HUD + shelf */
+    #hud{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:9px;z-index:5;flex-wrap:wrap;justify-content:center;max-width:96%}
+    .stat{background:rgba(255,255,255,.74);backdrop-filter:blur(6px);border-radius:999px;padding:7px 15px;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(49,81,58,.14);white-space:nowrap}
+    .stat small{font-weight:600;opacity:.6}
+    #who{position:absolute;top:14px;right:14px;z-index:5;background:rgba(255,255,255,.74);backdrop-filter:blur(6px);border:0;border-radius:999px;padding:7px 13px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(49,81,58,.14)}
+    #shelf{position:absolute;left:14px;right:14px;bottom:12px;z-index:5;background:rgba(255,255,255,.74);backdrop-filter:blur(6px);border-radius:16px;padding:9px 12px;box-shadow:0 6px 20px rgba(49,81,58,.16)}
     #shelf .title{font-size:12px;font-weight:700;opacity:.65;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
-    #plants{display:flex;flex-wrap:wrap;gap:6px;max-height:74px;overflow:auto}
-    #plants span{font-size:22px;line-height:1.1;animation:pop .4s ease}
+    #plants{display:flex;flex-wrap:wrap;gap:6px;max-height:66px;overflow:auto}
+    #plants span{font-size:22px;animation:pop .4s ease}
     #plants .empty{font-size:13px;font-weight:600;opacity:.5}
     @keyframes pop{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:scale(1);opacity:1}}
+    #hint{position:absolute;bottom:92px;left:50%;transform:translateX(-50%);z-index:5;font-size:13px;font-weight:600;color:#2c4a35;opacity:.75;background:rgba(255,255,255,.55);padding:6px 12px;border-radius:999px}
 
-    #hint{position:absolute;bottom:96px;left:50%;transform:translateX(-50%);z-index:5;font-size:13px;font-weight:600;
-      color:#2c4a35;opacity:.7;background:rgba(255,255,255,.55);padding:6px 12px;border-radius:999px}
-    .nom{position:absolute;font-size:18px;font-weight:800;color:#3a7a45;pointer-events:none;z-index:6;animation:nom .7s ease forwards}
-    @keyframes nom{0%{opacity:0;transform:translateY(0) scale(.8)}30%{opacity:1}100%{opacity:0;transform:translateY(-34px) scale(1.1)}}
+    /* login overlay */
+    #login{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(rgba(191,227,255,.55),rgba(234,251,230,.55));backdrop-filter:blur(4px)}
+    #login .card{background:rgba(255,255,255,.92);border-radius:22px;padding:26px 24px;width:min(340px,90vw);
+      box-shadow:0 18px 50px rgba(49,81,58,.28);text-align:center}
+    #login h1{margin:0 0 2px;font-size:24px}
+    #login p{margin:0 0 16px;font-size:13px;opacity:.65}
+    #login input{width:100%;padding:12px 14px;margin:6px 0;border:1.5px solid #cfe3d2;border-radius:12px;font-size:16px;text-align:center}
+    #login input:focus{outline:none;border-color:#5bb45a}
+    #login button{width:100%;margin-top:10px;padding:12px;border:0;border-radius:12px;background:#5bb45a;color:#fff;font-weight:800;font-size:16px;cursor:pointer}
+    #login button:active{transform:translateY(1px)}
+    #loginerr{color:#d9534f;font-size:13px;font-weight:600;min-height:18px;margin-top:8px}
+    .hidden{display:none!important}
   </style>
 </head>
 <body>
   <div id="scene">
     <div class="sun"></div>
     <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
-    <div class="hill far"></div><div class="hill near"></div>
+    <div class="layer treeline far-trees" id="farTrees"></div>
+    <div class="hill far"></div>
+    <div class="river"></div>
+    <div class="hill near"></div>
+    <div class="layer treeline near-trees" id="nearTrees"></div>
     <div class="ground"><div class="blades"></div></div>
+    <div class="layer flowers" id="flowers"></div>
 
-    <!-- grazing tufts -->
-    <div class="tuft" style="left:27%">🌿</div>
-    <div class="tuft" style="left:31%;font-size:22px">🌱</div>
-    <div class="tuft" style="left:24%;font-size:20px">🍀</div>
+    <div class="tuft" style="left:26%">🌿</div>
+    <div class="tuft" style="left:30%;font-size:22px">🌱</div>
+    <div class="tuft" style="left:23%;font-size:20px">🍀</div>
 
-    <!-- the alpaca -->
     <svg id="alpaca" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <!-- legs -->
-      <rect x="70" y="150" width="12" height="40" rx="6" fill="#efe6d6"/>
-      <rect x="92" y="150" width="12" height="40" rx="6" fill="#e7dcc9"/>
-      <rect x="118" y="150" width="12" height="40" rx="6" fill="#efe6d6"/>
-      <rect x="138" y="150" width="12" height="40" rx="6" fill="#e7dcc9"/>
-      <!-- body -->
+      <rect id="legBL" class="leg" x="118" y="150" width="12" height="40" rx="6" fill="#e7dcc9"/>
+      <rect id="legFL" class="leg" x="70" y="150" width="12" height="40" rx="6" fill="#e7dcc9"/>
+      <rect id="legBR" class="leg" x="138" y="150" width="12" height="40" rx="6" fill="#efe6d6"/>
+      <rect id="legFR" class="leg" x="92" y="150" width="12" height="40" rx="6" fill="#efe6d6"/>
       <ellipse cx="108" cy="132" rx="60" ry="40" fill="#f6efe0"/>
       <ellipse cx="108" cy="120" rx="58" ry="30" fill="#fffaf0"/>
-      <!-- tail -->
       <circle cx="164" cy="126" r="14" fill="#f6efe0"/>
-      <!-- head + neck group (dips when eating) -->
       <g id="headgroup">
         <rect x="64" y="70" width="26" height="66" rx="13" fill="#f6efe0"/>
         <ellipse cx="74" cy="66" rx="24" ry="22" fill="#fffaf0"/>
-        <!-- ears -->
         <path d="M60 52 L56 30 L72 46 Z" fill="#f6efe0"/>
         <path d="M88 52 L94 30 L76 46 Z" fill="#f6efe0"/>
-        <!-- face -->
         <circle cx="66" cy="64" r="3.4" fill="#4a3d33"/>
         <ellipse cx="80" cy="74" rx="12" ry="9" fill="#efe0cc"/>
-        <circle cx="82" cy="72" r="1.8" fill="#8a7a68"/>
-        <circle cx="86" cy="76" r="1.8" fill="#8a7a68"/>
+        <circle cx="82" cy="72" r="1.8" fill="#8a7a68"/><circle cx="86" cy="76" r="1.8" fill="#8a7a68"/>
       </g>
     </svg>
 
-    <!-- UI -->
-    <div id="hud">
+    <button id="who" class="hidden">🦙 <span id="pid"></span> · switch</button>
+    <div id="hud" class="hidden">
       <div class="stat">🌾 <span id="grass">0</span> <small>grass</small></div>
       <div class="stat">📏 <span id="dist">0</span> <small>m</small></div>
       <div class="stat">🪴 <span id="pcount">0</span> <small>plants</small></div>
     </div>
-
-    <div id="hint">Space / Click to graze 🌿</div>
-
-    <div id="shelf">
+    <div id="hint" class="hidden">Space / Click to graze 🌿</div>
+    <div id="shelf" class="hidden">
       <div class="title">🌸 collected plants</div>
       <div id="plants"><span class="empty">graze to grow your garden…</span></div>
     </div>
   </div>
 
-  <script>
-    const $ = s => document.querySelector(s);
-    const alpaca = $('#alpaca'), tufts = [...document.querySelectorAll('.tuft')];
-    let busy = false;
+  <!-- login / resume -->
+  <div id="login">
+    <div class="card">
+      <h1>🦙 Alpaca Meadow</h1>
+      <p>New ID → a fresh meadow.<br>Same ID + PIN → continue where you left off.</p>
+      <input id="in-id" placeholder="your ID (a–z, 0–9)" autocomplete="off" maxlength="20">
+      <input id="in-pin" placeholder="PIN (4–6 digits)" type="password" inputmode="numeric" maxlength="6">
+      <button id="go">Start / Continue 🌿</button>
+      <div id="loginerr"></div>
+    </div>
+  </div>
 
-    // sprinkle drifting pollen
-    for (let i=0;i<9;i++){
-      const p=document.createElement('div'); p.className='pollen';
-      p.style.left=(10+Math.random()*80)+'%';
-      p.style.animationDelay=(-Math.random()*9)+'s';
-      p.style.opacity=0.4+Math.random()*0.5;
-      document.getElementById('scene').appendChild(p);
-    }
+  <script>
+    const $=s=>document.querySelector(s);
+    const TREES=['🌲','🌳','🌴'], FLOWERS=['🌷','🌼','🌻','🌸','🪻'];
+    // build parallax strips (duplicated so the -50% loop is seamless)
+    function strip(el,set,n){let h='';for(let k=0;k<2;k++)for(let i=0;i<n;i++)h+='<span>'+set[i%set.length]+'</span>';el.innerHTML=h;el.style.width=(n*140)+'px';}
+    strip($('#farTrees'),TREES,16); strip($('#nearTrees'),['🌳','🌲'],12); strip($('#flowers'),FLOWERS,14);
+    for(let i=0;i<9;i++){const p=document.createElement('div');p.className='pollen';p.style.left=(10+Math.random()*80)+'%';p.style.animationDelay=(-Math.random()*9)+'s';$('#scene').appendChild(p);}
+
+    let TOKEN=localStorage.getItem('alpaca_token')||'';
+    let busy=false, loops=[];
+    const alpaca=$('#alpaca'), tufts=[...document.querySelectorAll('.tuft')];
+
+    const H=()=>TOKEN?{'X-Player-Token':TOKEN}:{};
+    async function api(path,method='GET'){return fetch(path,{method,headers:H()});}
 
     function render(s){
-      $('#grass').textContent = s.grass_eaten;
-      $('#dist').textContent = s.distance_m;
-      $('#pcount').textContent = s.plants.length;
-      const box = $('#plants');
-      const have = box.querySelectorAll('span:not(.empty)').length;
-      if (s.plants.length === 0){ return; }
-      if (have !== s.plants.length){
-        box.innerHTML = '';
-        // oldest first so newest pops on the end
-        [...s.plants].reverse().forEach(pl=>{
-          const el=document.createElement('span'); el.textContent=pl.emoji; el.title=pl.species; box.appendChild(el);
-        });
-        box.scrollTop = box.scrollHeight;
+      $('#pid').textContent=s.player_id;
+      $('#grass').textContent=s.grass_eaten; $('#dist').textContent=s.distance_m; $('#pcount').textContent=s.plants.length;
+      const box=$('#plants'); const have=box.querySelectorAll('span:not(.empty)').length;
+      if(s.plants.length && have!==s.plants.length){
+        box.innerHTML=''; [...s.plants].reverse().forEach(pl=>{const el=document.createElement('span');el.textContent=pl.emoji;el.title=pl.species;box.appendChild(el);});
+        box.scrollTop=box.scrollHeight;
       }
     }
+    async function refresh(){const r=await api('/state');if(r.ok)render(await r.json());}
 
-    async function refresh(){
-      try{ const r=await fetch('/state'); render(await r.json()); }catch(e){}
-    }
-
-    function nom(){
-      const n=document.createElement('div'); n.className='nom'; n.textContent='nom';
-      n.style.left='20%'; n.style.bottom='40%';
-      document.getElementById('scene').appendChild(n);
-      setTimeout(()=>n.remove(),700);
-    }
-
+    function nom(){const n=document.createElement('div');n.className='nom';n.textContent='nom';n.style.left='19%';n.style.bottom='40%';$('#scene').appendChild(n);setTimeout(()=>n.remove(),700);}
     async function graze(){
-      if(busy) return; busy=true;
-      alpaca.classList.add('eat');
-      const t = tufts[Math.floor(Math.random()*tufts.length)];
-      t.classList.add('eaten');
-      nom();
-      setTimeout(()=>{ alpaca.classList.remove('eat'); t.classList.remove('eaten'); busy=false; }, 300);
-      try{
-        const r = await fetch('/eat',{method:'POST'});
-        const d = await r.json();
-        $('#grass').textContent = d.grass_eaten;
-        if (d.sprouting) setTimeout(refresh, 700); // worker sprouts a plant
-      }catch(e){ busy=false; }
+      if(busy||!TOKEN)return;busy=true;
+      alpaca.classList.add('eat');const t=tufts[Math.floor(Math.random()*tufts.length)];t.classList.add('eaten');nom();
+      setTimeout(()=>{alpaca.classList.remove('eat');t.classList.remove('eaten');busy=false;},300);
+      try{const r=await api('/eat','POST');const d=await r.json();$('#grass').textContent=d.grass_eaten;if(d.sprouting)setTimeout(refresh,700);}catch(e){busy=false;}
     }
 
-    document.addEventListener('keydown', e=>{ if(e.code==='Space'){ e.preventDefault(); graze(); } });
-    document.addEventListener('click', graze);
+    function startGame(){
+      ['#hud','#shelf','#hint','#who'].forEach(s=>$(s).classList.remove('hidden'));
+      $('#login').classList.add('hidden');
+      document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();graze();}});
+      document.addEventListener('click',e=>{if(!e.target.closest('#who')&&!e.target.closest('#login'))graze();});
+      loops.push(setInterval(async()=>{const r=await api('/walk','POST');if(r.ok){const d=await r.json();$('#dist').textContent=d.distance_m;}},3000));
+      loops.push(setInterval(refresh,2500));
+      refresh();
+    }
 
-    // idle ambling — the alpaca keeps walking on its own
-    setInterval(async()=>{ try{ const r=await fetch('/walk',{method:'POST'}); const d=await r.json(); $('#dist').textContent=d.distance_m; }catch(e){} }, 3000);
-    setInterval(refresh, 2500);
-    refresh();
+    async function doLogin(){
+      const id=$('#in-id').value.trim().toLowerCase(), pin=$('#in-pin').value.trim();
+      $('#loginerr').textContent='';
+      try{
+        const r=await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({player_id:id,pin})});
+        const d=await r.json();
+        if(!r.ok){$('#loginerr').textContent=d.detail||'try again';return;}
+        TOKEN=d.token;localStorage.setItem('alpaca_token',TOKEN);localStorage.setItem('alpaca_id',d.player_id);
+        startGame();
+      }catch(e){$('#loginerr').textContent='network error';}
+    }
+    $('#go').addEventListener('click',doLogin);
+    $('#in-pin').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+    $('#who').addEventListener('click',()=>{localStorage.removeItem('alpaca_token');location.reload();});
+
+    // resume if we already have a valid token
+    (async()=>{
+      if(TOKEN){const r=await api('/state');if(r.ok){render(await r.json());startGame();return;}localStorage.removeItem('alpaca_token');TOKEN='';}
+      $('#in-id').focus();
+    })();
   </script>
 </body>
 </html>

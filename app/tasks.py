@@ -17,11 +17,11 @@ SPECIES = [
 ]
 
 
-def sprout_plant():
-    """Background job: a new plant sprouts and joins the collection."""
+def sprout_plant(player_id: str):
+    """Background job: a new plant sprouts and joins this player's collection."""
     species, emoji = random.choice(SPECIES)
     with get_conn() as conn:
         conn.execute(
-            "INSERT INTO plants (species, emoji) VALUES (%s, %s)",
-            (species, emoji),
+            "INSERT INTO plants (player_id, species, emoji) VALUES (%s, %s, %s)",
+            (player_id, species, emoji),
         )
