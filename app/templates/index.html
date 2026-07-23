@@ -75,6 +75,10 @@
     .pollen{position:absolute;width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.85);bottom:22%;animation:float 9s ease-in-out infinite}
     @keyframes float{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-40px);opacity:.95}}
 
+    /* ambient background alpacas — perspective via size/height/speed */
+    .deco{position:absolute;transform:scaleX(-1);pointer-events:none;line-height:1;filter:grayscale(.15);animation:amble linear infinite}
+    @keyframes amble{from{left:108%}to{left:-12%}}
+
     /* alpaca — wrapper flips it to face right; svg does the trot bob */
     #alpacaWrap{position:absolute;left:calc(58% - 392px);bottom:21%;width:196px;transform:scaleX(-1)}
     #alpaca{width:100%;animation:trot .82s ease-in-out infinite}
@@ -164,6 +168,14 @@
     <div class="layer near-trees" id="nearTrees"></div>
     <div class="ground"><div class="gravel"></div></div>
     <div class="layer flowers" id="flowers"></div>
+
+    <div id="deco">
+      <span class="deco" style="bottom:31%;font-size:22px;opacity:.4;animation-duration:85s;animation-delay:-8s">🦙</span>
+      <span class="deco" style="bottom:29%;font-size:27px;opacity:.46;animation-duration:72s;animation-delay:-40s">🦙</span>
+      <span class="deco" style="bottom:26%;font-size:34px;opacity:.54;animation-duration:58s;animation-delay:-20s">🦙</span>
+      <span class="deco" style="bottom:23%;font-size:42px;opacity:.6;animation-duration:50s;animation-delay:-63s">🦙</span>
+      <span class="deco" style="bottom:20%;font-size:52px;opacity:.68;animation-duration:40s;animation-delay:-30s">🦙</span>
+    </div>
 
     <div id="ghosts"></div>
 
@@ -260,10 +272,17 @@
     function renderGhosts(others,myDist){
       const ids=new Set(others.map(o=>o.id));
       others.forEach(o=>{
-        const x=50+(o.distance_m-myDist)*0.16; // 100m ≈ 16% of screen
-        if(x<-6||x>106){if(ghostEls[o.id]){ghostEls[o.id].remove();delete ghostEls[o.id];}return;}
+        const x=50+(o.distance_m-myDist)*0.9; // ~1m = 0.9% → on-screen window ≈ ±55m, so you stroll past them
+        if(x<-8||x>108){if(ghostEls[o.id]){ghostEls[o.id].remove();delete ghostEls[o.id];}return;}
         let el=ghostEls[o.id];
-        if(!el){el=document.createElement('div');el.className='ghost';el.innerHTML='<span class="tag"></span><span class="g-alpaca">🦙</span>';$('#ghosts').appendChild(el);ghostEls[o.id]=el;}
+        if(!el){
+          el=document.createElement('div');el.className='ghost';
+          el.innerHTML='<span class="tag"></span><span class="g-alpaca">🦙</span>';
+          const seed=[...o.id].reduce((a,c)=>a+c.charCodeAt(0),0),d=seed%4; // stable depth per player
+          el.style.bottom=(d*10)+'px';el.style.opacity=(0.5-d*0.06).toFixed(2);
+          el.querySelector('.g-alpaca').style.fontSize=(54-d*6)+'px';
+          $('#ghosts').appendChild(el);ghostEls[o.id]=el;
+        }
         el.querySelector('.tag').textContent=o.id+' · '+o.distance_m+'m';
         el.style.left=x+'%';
       });
