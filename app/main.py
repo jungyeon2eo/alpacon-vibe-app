@@ -105,8 +105,19 @@ def _state(pid: str):
             "SELECT species, emoji FROM plants WHERE player_id = %s ORDER BY id DESC LIMIT 300",
             (pid,),
         ).fetchall()
+        others = conn.execute(
+            "SELECT id, distance_m FROM players WHERE id != %s ORDER BY distance_m DESC LIMIT 40",
+            (pid,),
+        ).fetchall()
     plants = [{"species": r[0], "emoji": r[1]} for r in rows]
-    return {"player_id": pid, "grass_eaten": int(g[0]), "distance_m": int(g[1]), "plants": plants}
+    others = [{"id": o[0], "distance_m": int(o[1])} for o in others]
+    return {
+        "player_id": pid,
+        "grass_eaten": int(g[0]),
+        "distance_m": int(g[1]),
+        "plants": plants,
+        "others": others,
+    }
 
 
 @app.get("/state")

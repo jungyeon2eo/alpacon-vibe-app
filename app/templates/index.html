@@ -12,14 +12,14 @@
 
     /* day/night cycle — all layers share a 90s timeline */
     .sky{position:absolute;inset:0}
-    .sky.day{background:linear-gradient(#bfe3ff 0%,#d9f0ff 40%,#eafbe6 70%,#eafbe6 100%);animation:dayFade 90s linear infinite}
-    .sky.night{background:linear-gradient(#0a0f2e 0%,#172a55 60%,#33567f 100%);opacity:0;animation:nightFade 90s linear infinite}
-    .stars{position:absolute;left:0;right:0;top:0;height:62%;opacity:0;animation:starFade 90s linear infinite;pointer-events:none}
+    .sky.day{background:linear-gradient(#bfe3ff 0%,#d9f0ff 40%,#eafbe6 70%,#eafbe6 100%);animation:dayFade 70s linear infinite}
+    .sky.night{background:linear-gradient(#0a0f2e 0%,#172a55 60%,#33567f 100%);opacity:0;animation:nightFade 70s linear infinite}
+    .stars{position:absolute;left:0;right:0;top:0;height:62%;opacity:0;animation:starFade 70s linear infinite;pointer-events:none}
     .star{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;box-shadow:0 0 4px 1px rgba(255,255,255,.8)}
     .moon{position:absolute;top:8%;right:16%;width:64px;height:64px;border-radius:50%;
-      background:radial-gradient(circle at 38% 36%,#fffef4,#e2e6f2);box-shadow:0 0 34px 10px rgba(226,230,255,.45);opacity:0;animation:moonFade 90s linear infinite}
+      background:radial-gradient(circle at 38% 36%,#fffef4,#e2e6f2);box-shadow:0 0 34px 10px rgba(226,230,255,.45);opacity:0;animation:moonFade 70s linear infinite}
     .moon::after{content:"";position:absolute;top:15px;left:13px;width:11px;height:11px;border-radius:50%;background:rgba(178,184,208,.45);box-shadow:23px 12px 0 -2px rgba(178,184,208,.35),10px 30px 0 -4px rgba(178,184,208,.3)}
-    .veil{position:absolute;inset:0;background:#0a1030;opacity:0;animation:veilFade 90s linear infinite;pointer-events:none}
+    .veil{position:absolute;inset:0;background:#0a1030;opacity:0;animation:veilFade 70s linear infinite;pointer-events:none}
     @keyframes dayFade{0%,38%{opacity:1}50%{opacity:0}82%{opacity:0}96%,100%{opacity:1}}
     @keyframes nightFade{0%,38%{opacity:0}52%{opacity:1}80%{opacity:1}94%,100%{opacity:0}}
     @keyframes starFade{0%,42%{opacity:0}56%{opacity:.9}80%{opacity:.9}92%,100%{opacity:0}}
@@ -28,7 +28,7 @@
     @keyframes moonFade{0%,40%{opacity:0;transform:translateY(26px)}54%{opacity:1;transform:translateY(0)}80%{opacity:1;transform:translateY(0)}92%,100%{opacity:0;transform:translateY(26px)}}
 
     .sun{position:absolute;top:7%;left:12%;width:82px;height:82px;border-radius:50%;
-      background:radial-gradient(circle,#fff7c9,#ffe27a);box-shadow:0 0 60px 18px rgba(255,226,122,.5);animation:sunCycle 90s linear infinite}
+      background:radial-gradient(circle,#fff7c9,#ffe27a);box-shadow:0 0 60px 18px rgba(255,226,122,.5);animation:sunCycle 70s linear infinite}
     .cloud{position:absolute;background:#fff;border-radius:50px;opacity:.9}
     .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
     .cloud::before{width:55%;height:180%;top:-55%;left:12%}.cloud::after{width:45%;height:150%;top:-40%;right:14%}
@@ -94,9 +94,10 @@
     @keyframes nom{0%{opacity:0;transform:translateY(0)}30%{opacity:1}100%{opacity:0;transform:translateY(-34px) scale(1.1)}}
 
     /* tagline */
-    #tagline{position:absolute;top:16px;left:16px;z-index:5;pointer-events:none;line-height:1.2}
-    #tagline b{display:block;font-size:18px;color:#2c4a35;text-shadow:0 1px 2px rgba(255,255,255,.6)}
-    #tagline small{font-size:12px;font-weight:600;opacity:.62}
+    #tagline{position:absolute;top:16px;left:18px;z-index:5;pointer-events:none;line-height:1.15}
+    #tagline b{display:block;font-size:30px;color:#2c4a35;text-shadow:0 1px 3px rgba(255,255,255,.5);animation:tagCol 70s linear infinite}
+    #tagline small{font-size:16px;font-weight:600;color:#2c4a35;opacity:.7;animation:tagCol 70s linear infinite}
+    @keyframes tagCol{0%,40%{color:#2c4a35}55%{color:#eaf4ff}80%{color:#eaf4ff}94%,100%{color:#2c4a35}}
 
     /* HUD + shelf */
     #hud{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:9px;z-index:5;flex-wrap:wrap;justify-content:center;max-width:70%}
@@ -110,6 +111,19 @@
     #plants .empty{font-size:13px;font-weight:600;opacity:.5}
     @keyframes pop{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:scale(1);opacity:1}}
     #hint{position:absolute;bottom:92px;left:50%;transform:translateX(-50%);z-index:5;font-size:13px;font-weight:600;color:#2c4a35;opacity:.75;background:rgba(255,255,255,.55);padding:6px 12px;border-radius:999px}
+
+    /* background ghost alpacas of other wanderers */
+    #ghosts{position:absolute;left:0;right:0;bottom:20%;height:0}
+    .ghost{position:absolute;bottom:0;transform:translateX(-50%);text-align:center;opacity:.42;filter:grayscale(.25);transition:left 2.6s linear}
+    .ghost .g-alpaca{display:block;font-size:52px;line-height:1;transform:scaleX(-1)}
+    .ghost .tag{display:inline-block;background:rgba(255,255,255,.72);border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;color:#31513a;white-space:nowrap;margin-bottom:2px}
+
+    /* gentle "others wandering" board */
+    #board{position:absolute;top:52px;right:14px;z-index:5;background:rgba(255,255,255,.62);backdrop-filter:blur(6px);border-radius:14px;padding:8px 12px;width:172px;box-shadow:0 4px 14px rgba(49,81,58,.14);font-size:12px}
+    #board .title{font-weight:700;opacity:.6;margin-bottom:5px;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em}
+    #board .row{display:flex;justify-content:space-between;gap:10px;padding:1.5px 0}
+    #board .row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #board .row b{font-weight:700;opacity:.75}
 
     #login{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:linear-gradient(rgba(191,227,255,.55),rgba(234,251,230,.55));backdrop-filter:blur(4px)}
     #login .card{background:rgba(255,255,255,.92);border-radius:22px;padding:26px 24px;width:min(340px,90vw);box-shadow:0 18px 50px rgba(49,81,58,.28);text-align:center}
@@ -136,6 +150,8 @@
     <div class="layer near-trees" id="nearTrees"></div>
     <div class="ground"><div class="gravel"></div></div>
     <div class="layer flowers" id="flowers"></div>
+
+    <div id="ghosts"></div>
 
     <!-- grazing plants: just in front of the (right-facing) alpaca -->
     <div class="tuft" style="left:calc(58% - 150px)">🌿</div>
@@ -167,6 +183,7 @@
 
     <div id="tagline"><b>enjoy the peace</b><small>no thinking required 🌿</small></div>
     <button id="who" class="hidden">🦙 <span id="pid"></span> · switch</button>
+    <div id="board" class="hidden"><div class="title">others wandering 🦙</div><div id="boardrows"></div></div>
     <div id="hud" class="hidden">
       <div class="stat">🌾 <span id="grass">0</span> <small>grass</small></div>
       <div class="stat">📏 <span id="dist">0</span> <small>m</small></div>
@@ -196,7 +213,7 @@
     function strip(el,set,n){let h='';for(let k=0;k<2;k++)for(let i=0;i<n;i++)h+='<span>'+set[i%set.length]+'</span>';el.innerHTML=h;}
     strip($('#farTrees'),['🌲','🌳','🌴'],18);
     strip($('#nearTrees'),['🌳','🌲'],14);
-    strip($('#flowers'),['🌱','🌿','☘️','🍀','🌾'],16);
+    strip($('#flowers'),['🌱','🌿','☘️','🍀','🌾'],20);
     for(let i=0;i<9;i++){const p=document.createElement('div');p.className='pollen';p.style.left=(10+Math.random()*80)+'%';p.style.animationDelay=(-Math.random()*9)+'s';$('#scene').appendChild(p);}
     {let h='';for(let i=0;i<64;i++){h+='<div class="star" style="left:'+(Math.random()*100).toFixed(1)+'%;top:'+(Math.random()*100).toFixed(1)+'%;opacity:'+(0.4+Math.random()*0.6).toFixed(2)+'"></div>';}$('#stars').innerHTML=h;}
 
@@ -205,10 +222,30 @@
     const H=()=>TOKEN?{'X-Player-Token':TOKEN}:{};
     const api=(p,m='GET')=>fetch(p,{method:m,headers:H()});
 
+    const ghostEls={};
+    function renderGhosts(others,myDist){
+      const ids=new Set(others.map(o=>o.id));
+      others.forEach(o=>{
+        const x=50+(o.distance_m-myDist)*0.16; // 100m ≈ 16% of screen
+        if(x<-6||x>106){if(ghostEls[o.id]){ghostEls[o.id].remove();delete ghostEls[o.id];}return;}
+        let el=ghostEls[o.id];
+        if(!el){el=document.createElement('div');el.className='ghost';el.innerHTML='<span class="tag"></span><span class="g-alpaca">🦙</span>';$('#ghosts').appendChild(el);ghostEls[o.id]=el;}
+        el.querySelector('.tag').textContent=o.id+' · '+o.distance_m+'m';
+        el.style.left=x+'%';
+      });
+      Object.keys(ghostEls).forEach(id=>{if(!ids.has(id)){ghostEls[id].remove();delete ghostEls[id];}});
+    }
+    function renderBoard(others){
+      const list=[...others].sort((a,b)=>b.distance_m-a.distance_m).slice(0,6);
+      $('#boardrows').innerHTML = list.length
+        ? list.map(o=>'<div class="row"><span>🦙 '+o.id+'</span><b>'+o.distance_m+'m</b></div>').join('')
+        : '<div class="row" style="opacity:.5">just you out here 🌾</div>';
+    }
     function render(s){
       $('#pid').textContent=s.player_id;$('#grass').textContent=s.grass_eaten;$('#dist').textContent=s.distance_m;$('#pcount').textContent=s.plants.length;
       const box=$('#plants');const have=box.querySelectorAll('span:not(.empty)').length;
       if(s.plants.length&&have!==s.plants.length){box.innerHTML='';[...s.plants].reverse().forEach(pl=>{const el=document.createElement('span');el.textContent=pl.emoji;el.title=pl.species;box.appendChild(el);});box.scrollTop=box.scrollHeight;}
+      const others=s.others||[];renderGhosts(others,s.distance_m);renderBoard(others);
     }
     async function refresh(){const r=await api('/state');if(r.ok)render(await r.json());}
     function nom(){const n=document.createElement('div');n.className='nom';n.textContent='nom';n.style.left='calc(58% - 130px)';n.style.bottom='40%';$('#scene').appendChild(n);setTimeout(()=>n.remove(),700);}
@@ -219,7 +256,7 @@
       try{const r=await api('/eat','POST');const d=await r.json();$('#grass').textContent=d.grass_eaten;if(d.sprouting)setTimeout(refresh,700);}catch(e){busy=false;}
     }
     function startGame(){
-      ['#hud','#shelf','#hint','#who'].forEach(s=>$(s).classList.remove('hidden'));$('#login').classList.add('hidden');
+      ['#hud','#shelf','#hint','#who','#board'].forEach(s=>$(s).classList.remove('hidden'));$('#login').classList.add('hidden');
       document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();graze();}});
       document.addEventListener('click',e=>{if(!e.target.closest('#who')&&!e.target.closest('#login'))graze();});
       setInterval(async()=>{const r=await api('/walk','POST');if(r.ok){const d=await r.json();$('#dist').textContent=d.distance_m;}},3000);
