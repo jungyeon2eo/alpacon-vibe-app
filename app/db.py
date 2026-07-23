@@ -53,3 +53,15 @@ def init_db():
             """
         )
         conn.execute("CREATE INDEX IF NOT EXISTS plants_player_idx ON plants (player_id)")
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS checkpoints (
+                id         SERIAL PRIMARY KEY,
+                player_id  TEXT NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+                name       TEXT NOT NULL,
+                distance_m BIGINT NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            )
+            """
+        )
+        conn.execute("CREATE INDEX IF NOT EXISTS checkpoints_player_idx ON checkpoints (player_id)")

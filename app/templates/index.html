@@ -124,6 +124,20 @@
     #board .row{display:flex;justify-content:space-between;gap:10px;padding:1.5px 0}
     #board .row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #board .row b{font-weight:700;opacity:.75}
+    #boardrows{max-height:230px;overflow:auto}
+
+    /* checkpoints (bookmark spots, return anytime) */
+    #cp{position:absolute;top:96px;left:14px;z-index:5;background:rgba(255,255,255,.62);backdrop-filter:blur(6px);border-radius:14px;padding:8px 10px;width:184px;box-shadow:0 4px 14px rgba(49,81,58,.14);font-size:12px}
+    #cp .title{font-weight:700;opacity:.6;margin-bottom:6px;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em}
+    #cp .btns{display:flex;gap:6px;margin-bottom:6px}
+    #cp .btns button{flex:1;border:0;border-radius:8px;padding:6px 8px;font-weight:700;font-size:12px;cursor:pointer;background:#eaf3e6;color:#31513a}
+    #cp .btns button:active{transform:translateY(1px)}
+    #cp .list{max-height:150px;overflow:auto}
+    #cp .list .row{display:flex;align-items:center;gap:6px;padding:2px 0}
+    #cp .list .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+    #cp .list .go{border:0;border-radius:7px;padding:3px 8px;background:#5bb45a;color:#fff;font-weight:700;cursor:pointer;font-size:11px}
+    #cp .list .del{border:0;background:transparent;color:#c0607a;opacity:.65;cursor:pointer;font-size:13px;padding:0 2px}
+    #cp .empty{opacity:.5}
 
     #login{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:linear-gradient(rgba(191,227,255,.55),rgba(234,251,230,.55));backdrop-filter:blur(4px)}
     #login .card{background:rgba(255,255,255,.92);border-radius:22px;padding:26px 24px;width:min(340px,90vw);box-shadow:0 18px 50px rgba(49,81,58,.28);text-align:center}
@@ -184,6 +198,11 @@
     <div id="tagline"><b>enjoy the peace</b><small>no thinking required 🌿</small></div>
     <button id="who" class="hidden">🦙 <span id="pid"></span> · switch</button>
     <div id="board" class="hidden"><div class="title">others wandering 🦙</div><div id="boardrows"></div></div>
+    <div id="cp" class="hidden">
+      <div class="title">📍 checkpoints</div>
+      <div class="btns"><button id="cpAdd">📍 save here</button><button id="cpStart">⏮ start</button></div>
+      <div class="list" id="cpList"></div>
+    </div>
     <div id="hud" class="hidden">
       <div class="stat">🌾 <span id="grass">0</span> <small>grass</small></div>
       <div class="stat">📏 <span id="dist">0</span> <small>m</small></div>
@@ -221,6 +240,21 @@
     const wrap=$('#alpacaWrap'), tufts=[...document.querySelectorAll('.tuft')];
     const H=()=>TOKEN?{'X-Player-Token':TOKEN}:{};
     const api=(p,m='GET')=>fetch(p,{method:m,headers:H()});
+    const apiJSON=(p,m,b)=>fetch(p,{method:m,headers:Object.assign({'Content-Type':'application/json'},H()),body:b?JSON.stringify(b):undefined});
+    function gotoDist(d){apiJSON('/goto','POST',{distance_m:d}).then(r=>r.json()).then(x=>{$('#dist').textContent=x.distance_m;refresh();});}
+    function renderCheckpoints(cps){
+      const L=$('#cpList');L.innerHTML='';
+      if(!cps.length){L.innerHTML='<div class="row empty">no spots saved yet</div>';return;}
+      cps.forEach(c=>{
+        const row=document.createElement('div');row.className='row';
+        const nm=document.createElement('span');nm.className='nm';nm.textContent=c.name;nm.title='go to '+c.distance_m+'m';
+        const go=document.createElement('button');go.className='go';go.textContent='go';
+        const del=document.createElement('button');del.className='del';del.textContent='✕';
+        nm.onclick=go.onclick=()=>gotoDist(c.distance_m);
+        del.onclick=()=>fetch('/checkpoint/'+c.id,{method:'DELETE',headers:H()}).then(refresh);
+        row.append(nm,go,del);L.appendChild(row);
+      });
+    }
 
     const ghostEls={};
     function renderGhosts(others,myDist){
@@ -236,7 +270,7 @@
       Object.keys(ghostEls).forEach(id=>{if(!ids.has(id)){ghostEls[id].remove();delete ghostEls[id];}});
     }
     function renderBoard(others){
-      const list=[...others].sort((a,b)=>b.distance_m-a.distance_m).slice(0,6);
+      const list=[...others].sort((a,b)=>b.distance_m-a.distance_m).slice(0,10);
       $('#boardrows').innerHTML = list.length
         ? list.map(o=>'<div class="row"><span>🦙 '+o.id+'</span><b>'+o.distance_m+'m</b></div>').join('')
         : '<div class="row" style="opacity:.5">just you out here 🌾</div>';
@@ -246,6 +280,7 @@
       const box=$('#plants');const have=box.querySelectorAll('span:not(.empty)').length;
       if(s.plants.length&&have!==s.plants.length){box.innerHTML='';[...s.plants].reverse().forEach(pl=>{const el=document.createElement('span');el.textContent=pl.emoji;el.title=pl.species;box.appendChild(el);});box.scrollTop=box.scrollHeight;}
       const others=s.others||[];renderGhosts(others,s.distance_m);renderBoard(others);
+      renderCheckpoints(s.checkpoints||[]);
     }
     async function refresh(){const r=await api('/state');if(r.ok)render(await r.json());}
     function nom(){const n=document.createElement('div');n.className='nom';n.textContent='nom';n.style.left='calc(58% - 130px)';n.style.bottom='40%';$('#scene').appendChild(n);setTimeout(()=>n.remove(),700);}
@@ -256,7 +291,9 @@
       try{const r=await api('/eat','POST');const d=await r.json();$('#grass').textContent=d.grass_eaten;if(d.sprouting)setTimeout(refresh,700);}catch(e){busy=false;}
     }
     function startGame(){
-      ['#hud','#shelf','#hint','#who','#board'].forEach(s=>$(s).classList.remove('hidden'));$('#login').classList.add('hidden');
+      ['#hud','#shelf','#hint','#who','#board','#cp'].forEach(s=>$(s).classList.remove('hidden'));$('#login').classList.add('hidden');
+      $('#cpAdd').onclick=()=>apiJSON('/checkpoint','POST',{}).then(refresh);
+      $('#cpStart').onclick=()=>gotoDist(0);
       document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();graze();}});
       document.addEventListener('click',e=>{if(!e.target.closest('#who')&&!e.target.closest('#login'))graze();});
       setInterval(async()=>{const r=await api('/walk','POST');if(r.ok){const d=await r.json();$('#dist').textContent=d.distance_m;}},3000);

@@ -61,6 +61,14 @@ class Login(BaseModel):
     pin: str
 
 
+class Checkpoint(BaseModel):
+    name: str = ""
+
+
+class Goto(BaseModel):
+    distance_m: int
+
+
 @app.get("/healthz")
 def healthz():
     return {"ok": True}
@@ -109,14 +117,20 @@ def _state(pid: str):
             "SELECT id, distance_m FROM players WHERE id != %s ORDER BY distance_m DESC LIMIT 40",
             (pid,),
         ).fetchall()
+        cps = conn.execute(
+            "SELECT id, name, distance_m FROM checkpoints WHERE player_id = %s ORDER BY distance_m ASC",
+            (pid,),
+        ).fetchall()
     plants = [{"species": r[0], "emoji": r[1]} for r in rows]
     others = [{"id": o[0], "distance_m": int(o[1])} for o in others]
+    checkpoints = [{"id": c[0], "name": c[1], "distance_m": int(c[2])} for c in cps]
     return {
         "player_id": pid,
         "grass_eaten": int(g[0]),
         "distance_m": int(g[1]),
         "plants": plants,
         "others": others,
+        "checkpoints": checkpoints,
     }
 
 
@@ -154,3 +168,36 @@ def walk(pid: str = Depends(require_player)):
             (step, pid),
         ).fetchone()
     return {"distance_m": int(row[0])}
+
+
+@app.post("/checkpoint")
+def set_checkpoint(body: Checkpoint, pid: str = Depends(require_player)):
+    """Bookmark the current spot so you can wander back to it anytime."""
+    with get_conn() as conn:
+        d = conn.execute("SELECT distance_m FROM players WHERE id = %s", (pid,)).fetchone()[0]
+        cnt = conn.execute("SELECT count(*) FROM checkpoints WHERE player_id = %s", (pid,)).fetchone()[0]
+        if int(cnt) >= 12:
+            raise HTTPException(status_code=400, detail="checkpoint limit (12) — remove one first")
+        name = (body.name or "").strip()[:30] or f"{int(d)} m"
+        row = conn.execute(
+            "INSERT INTO checkpoints (player_id, name, distance_m) VALUES (%s, %s, %s) "
+            "RETURNING id, name, distance_m",
+            (pid, name, int(d)),
+        ).fetchone()
+    return {"id": row[0], "name": row[1], "distance_m": int(row[2])}
+
+
+@app.post("/goto")
+def goto(body: Goto, pid: str = Depends(require_player)):
+    """Travel to a saved spot (or back to the start with distance 0)."""
+    d = max(0, int(body.distance_m))
+    with get_conn() as conn:
+        conn.execute("UPDATE players SET distance_m = %s, updated_at = now() WHERE id = %s", (d, pid))
+    return {"distance_m": d}
+
+
+@app.delete("/checkpoint/{cid}")
+def del_checkpoint(cid: int, pid: str = Depends(require_player)):
+    with get_conn() as conn:
+        conn.execute("DELETE FROM checkpoints WHERE id = %s AND player_id = %s", (cid, pid))
+    return {"ok": True}
