@@ -28,7 +28,7 @@
     .near-trees{bottom:20%;animation:slide 17s linear infinite}
     .near-trees span{font-size:76px;margin-right:34px;filter:drop-shadow(0 6px 4px rgba(0,60,20,.12))}
     .flowers{bottom:14%;animation:slide 11s linear infinite}
-    .flowers span{font-size:24px;margin-right:50px}
+    .flowers span{font-size:19px;margin-right:44px;opacity:.9}
     @keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
     .hill{position:absolute;left:-5%;width:110%;border-radius:50% 50% 0 0}
@@ -59,7 +59,7 @@
     @keyframes float{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-40px);opacity:.95}}
 
     /* alpaca — wrapper flips it to face right; svg does the trot bob */
-    #alpacaWrap{position:absolute;left:58%;bottom:21%;width:196px;transform:scaleX(-1)}
+    #alpacaWrap{position:absolute;left:calc(58% - 392px);bottom:21%;width:196px;transform:scaleX(-1)}
     #alpaca{width:100%;animation:trot .82s ease-in-out infinite}
     @keyframes trot{0%,100%{transform:translateY(0)}25%{transform:translateY(-5px)}50%{transform:translateY(0)}75%{transform:translateY(-5px)}}
     #alpaca .leg{transform-box:fill-box;transform-origin:50% 0}
@@ -116,9 +116,10 @@
     <div class="ground"><div class="gravel"></div></div>
     <div class="layer flowers" id="flowers"></div>
 
-    <div class="tuft" style="left:46%">🌿</div>
-    <div class="tuft" style="left:50%;font-size:26px">🌱</div>
-    <div class="tuft" style="left:54%;font-size:24px">🍀</div>
+    <!-- grazing plants: just in front of the (right-facing) alpaca -->
+    <div class="tuft" style="left:calc(58% - 150px)">🌿</div>
+    <div class="tuft" style="left:calc(58% - 118px);font-size:26px">🌱</div>
+    <div class="tuft" style="left:calc(58% - 86px);font-size:24px">🍀</div>
 
     <div id="alpacaWrap">
       <svg id="alpaca" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
@@ -172,7 +173,7 @@
     function strip(el,set,n){let h='';for(let k=0;k<2;k++)for(let i=0;i<n;i++)h+='<span>'+set[i%set.length]+'</span>';el.innerHTML=h;}
     strip($('#farTrees'),['🌲','🌳','🌴'],18);
     strip($('#nearTrees'),['🌳','🌲'],14);
-    strip($('#flowers'),['🌷','🌼','🌻','🌸','🪻'],16);
+    strip($('#flowers'),['🌱','🌿','☘️','🍀','🌾'],16);
     for(let i=0;i<9;i++){const p=document.createElement('div');p.className='pollen';p.style.left=(10+Math.random()*80)+'%';p.style.animationDelay=(-Math.random()*9)+'s';$('#scene').appendChild(p);}
 
     let TOKEN=localStorage.getItem('alpaca_token')||'';let busy=false;
@@ -186,7 +187,7 @@
       if(s.plants.length&&have!==s.plants.length){box.innerHTML='';[...s.plants].reverse().forEach(pl=>{const el=document.createElement('span');el.textContent=pl.emoji;el.title=pl.species;box.appendChild(el);});box.scrollTop=box.scrollHeight;}
     }
     async function refresh(){const r=await api('/state');if(r.ok)render(await r.json());}
-    function nom(){const n=document.createElement('div');n.className='nom';n.textContent='nom';n.style.left='52%';n.style.bottom='40%';$('#scene').appendChild(n);setTimeout(()=>n.remove(),700);}
+    function nom(){const n=document.createElement('div');n.className='nom';n.textContent='nom';n.style.left='calc(58% - 130px)';n.style.bottom='40%';$('#scene').appendChild(n);setTimeout(()=>n.remove(),700);}
     async function graze(){
       if(busy||!TOKEN)return;busy=true;
       wrap.classList.add('eat');const t=tufts[Math.floor(Math.random()*tufts.length)];t.classList.add('eaten');nom();
