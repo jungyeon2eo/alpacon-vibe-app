@@ -7,11 +7,28 @@
   <style>
     *{box-sizing:border-box}
     html,body{margin:0;height:100%;overflow:hidden;font-family:-apple-system,Inter,"Segoe UI",Roboto,sans-serif;color:#31513a;user-select:none}
-    body{background:linear-gradient(#bfe3ff 0%,#d9f0ff 40%,#eafbe6 70%,#eafbe6 100%);cursor:pointer}
+    body{background:#0a0f2e;cursor:pointer}
     #scene{position:fixed;inset:0}
 
+    /* day/night cycle — all layers share a 90s timeline */
+    .sky{position:absolute;inset:0}
+    .sky.day{background:linear-gradient(#bfe3ff 0%,#d9f0ff 40%,#eafbe6 70%,#eafbe6 100%);animation:dayFade 90s linear infinite}
+    .sky.night{background:linear-gradient(#0a0f2e 0%,#172a55 60%,#33567f 100%);opacity:0;animation:nightFade 90s linear infinite}
+    .stars{position:absolute;left:0;right:0;top:0;height:62%;opacity:0;animation:starFade 90s linear infinite;pointer-events:none}
+    .star{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;box-shadow:0 0 4px 1px rgba(255,255,255,.8)}
+    .moon{position:absolute;top:8%;right:16%;width:64px;height:64px;border-radius:50%;
+      background:radial-gradient(circle at 38% 36%,#fffef4,#e2e6f2);box-shadow:0 0 34px 10px rgba(226,230,255,.45);opacity:0;animation:moonFade 90s linear infinite}
+    .moon::after{content:"";position:absolute;top:15px;left:13px;width:11px;height:11px;border-radius:50%;background:rgba(178,184,208,.45);box-shadow:23px 12px 0 -2px rgba(178,184,208,.35),10px 30px 0 -4px rgba(178,184,208,.3)}
+    .veil{position:absolute;inset:0;background:#0a1030;opacity:0;animation:veilFade 90s linear infinite;pointer-events:none}
+    @keyframes dayFade{0%,38%{opacity:1}50%{opacity:0}82%{opacity:0}96%,100%{opacity:1}}
+    @keyframes nightFade{0%,38%{opacity:0}52%{opacity:1}80%{opacity:1}94%,100%{opacity:0}}
+    @keyframes starFade{0%,42%{opacity:0}56%{opacity:.9}80%{opacity:.9}92%,100%{opacity:0}}
+    @keyframes veilFade{0%,40%{opacity:0}55%{opacity:.4}80%{opacity:.4}94%,100%{opacity:0}}
+    @keyframes sunCycle{0%,34%{opacity:1;transform:translateY(0)}46%{opacity:0;transform:translateY(26px)}88%{opacity:0;transform:translateY(26px)}98%,100%{opacity:1;transform:translateY(0)}}
+    @keyframes moonFade{0%,40%{opacity:0;transform:translateY(26px)}54%{opacity:1;transform:translateY(0)}80%{opacity:1;transform:translateY(0)}92%,100%{opacity:0;transform:translateY(26px)}}
+
     .sun{position:absolute;top:7%;left:12%;width:82px;height:82px;border-radius:50%;
-      background:radial-gradient(circle,#fff7c9,#ffe27a);box-shadow:0 0 60px 18px rgba(255,226,122,.5)}
+      background:radial-gradient(circle,#fff7c9,#ffe27a);box-shadow:0 0 60px 18px rgba(255,226,122,.5);animation:sunCycle 90s linear infinite}
     .cloud{position:absolute;background:#fff;border-radius:50px;opacity:.9}
     .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
     .cloud::before{width:55%;height:180%;top:-55%;left:12%}.cloud::after{width:45%;height:150%;top:-40%;right:14%}
@@ -68,7 +85,7 @@
     @keyframes swingA{0%,100%{transform:rotate(17deg)}50%{transform:rotate(-17deg)}}
     @keyframes swingB{0%,100%{transform:rotate(-17deg)}50%{transform:rotate(17deg)}}
     #headgroup{transform-origin:74px 96px;transition:transform .28s cubic-bezier(.34,1.4,.5,1)}
-    #alpacaWrap.eat #headgroup{transform:translateY(12px) rotate(40deg)}
+    #alpacaWrap.eat #headgroup{transform:translateY(10px) rotate(-44deg)}
 
     /* green grazing tufts (distinct from the brown ground) */
     .tuft{position:absolute;bottom:19%;font-size:30px;transition:transform .2s,opacity .2s;filter:drop-shadow(0 2px 1px rgba(0,60,20,.25))}
@@ -106,7 +123,11 @@
 </head>
 <body>
   <div id="scene">
+    <div class="sky day"></div>
+    <div class="sky night"></div>
+    <div class="stars" id="stars"></div>
     <div class="sun"></div>
+    <div class="moon"></div>
     <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
     <div class="layer far-trees" id="farTrees"></div>
     <div class="hill far"></div>
@@ -142,6 +163,8 @@
       </svg>
     </div>
 
+    <div class="veil"></div>
+
     <div id="tagline"><b>enjoy the peace</b><small>no thinking required 🌿</small></div>
     <button id="who" class="hidden">🦙 <span id="pid"></span> · switch</button>
     <div id="hud" class="hidden">
@@ -175,6 +198,7 @@
     strip($('#nearTrees'),['🌳','🌲'],14);
     strip($('#flowers'),['🌱','🌿','☘️','🍀','🌾'],16);
     for(let i=0;i<9;i++){const p=document.createElement('div');p.className='pollen';p.style.left=(10+Math.random()*80)+'%';p.style.animationDelay=(-Math.random()*9)+'s';$('#scene').appendChild(p);}
+    {let h='';for(let i=0;i<64;i++){h+='<div class="star" style="left:'+(Math.random()*100).toFixed(1)+'%;top:'+(Math.random()*100).toFixed(1)+'%;opacity:'+(0.4+Math.random()*0.6).toFixed(2)+'"></div>';}$('#stars').innerHTML=h;}
 
     let TOKEN=localStorage.getItem('alpaca_token')||'';let busy=false;
     const wrap=$('#alpacaWrap'), tufts=[...document.querySelectorAll('.tuft')];
